@@ -1,0 +1,80 @@
+[alias]
+[user]
+	name = Nate Cavanaugh
+	email = nate@----.com
+	editor = /Volumes/Data/ncavanaugh/Applications/TextMate.app
+[core]
+	excludesfile = /Volumes/Data/ncavanaugh/.gitignore
+	quotepath = false
+	# editor = mate -w
+[branch]
+	autosetupmerge = true
+
+[gui]
+	recentrepo = /Volumes/Development/Work/git/natecavanaugh/alloy
+	recentrepo = /Volumes/Trunk/Development/portal
+[alias]
+	ci = commit
+	cia = commit --amend
+	cam = commit -a -m
+	ca = commit -a
+	br = branch
+	cb = "!f() { git checkout -b $1 2> /dev/null && echo "Created new branch $1" || `git checkout $1`; }; f"
+	st = status
+	co = checkout
+	lc = log ORIG_HEAD.. --stat --no-merges
+	sb = show-branch
+	mg = merge
+	wu = log origin/master..
+	pop = reset head^
+	squish = commit -a --amend -C HEAD
+	squeeze = commit --amend -C HEAD
+	wup = log -p origin/master..
+	save = stash && git-stash apply
+	
+	pr = pull-request
+	lcid = rev-parse HEAD
+	db = "!sh -c 'git branch -D $0'"
+	db-remote = "!sh -c 'git push origin :$0'"
+	db-all = "!sh -c 'git db $0 && git db-remote $0'"
+	patch-ee = "!f() { local output_dir='/Volumes/Development/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply -v --check $patch_name && git apply $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
+	rpatch-ee = "!f() { local output_dir='/Volumes/Development/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply --reject $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
+	push-all = "!git push origin && git push upstream;"
+	pbo = "!git push origin $(git name-rev --name-only HEAD)"
+	pu = pull upstream
+	fu = fetch upstream
+	lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
+	hd = !"git --no-pager log -1 --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset\n' --abbrev-commit --date=relative"
+	head = !"git log -n1"
+	m =  !"git co master"
+	ss = !"git add . && git stash save"
+	sp = stash pop
+	sl = stash list
+	bn = "!git name-rev --name-only HEAD"
+	delta = "!sh -c 'git diff ${0}^ $0'"
+	dl = "!sh -c 'git diff --stat ${0}^ $0'"
+
+	sync-origin="!sh -c 'git pull upstream master && git push origin master'"
+	so = "!git sync-origin"
+
+	# open batch of files
+	# open = "!f() { editor=`git config --get user.editor`;files=`git show --pretty="format:" --name-only $1`;useopen=`command -v open`; usecygwin=`command -v cygstart`; [[ -n "$useopen" ]] && open -a $editor $files && exit $?; [[ -n "$usecygwin" ]] && editor=$(cygpath -d "$editor"); for i in $files; do echo "opening $i"; $usecygwin $editor $i; done }; f"
+
+	# open each file individually
+	open = "!f() { local to_rev="${1}^" editor=`git config --get user.editor`;files=`git diff --pretty="format:" --name-only $to_rev $1`;useopen=`command -v open`; usecygwin=`command -v cygstart`; [[ -n "$useopen" ]] && for i in $files; do echo "opening $i"; $useopen -a $editor $i; done && exit $?; [[ -n "$usecygwin" ]] && editor=$(cygpath -d "$editor"); for i in $files; do echo "opening $i"; $usecygwin $editor $i; done }; f"
+
+
+[github]
+	user = XXXXXXXXXXXX
+	token = XXXXXXXXXXXXXXXX
+	reviewer = XXXXXXXXXXXX
+
+[color]
+	ui = auto
+
+[git-pull-request]
+	color-display-title-text = green
+    color-display-title-user = cyan
+    color-display-info-repo-title = white
+    color-display-info-repo-count = yellow
+    
