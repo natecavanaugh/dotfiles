@@ -11,8 +11,8 @@
 	autosetupmerge = true
 
 [gui]
-	recentrepo = /Volumes/Development/Work/git/natecavanaugh/alloy
-	recentrepo = /Volumes/Trunk/Development/portal
+	recentrepo = /Volumes/Dev/Work/git/natecavanaugh/alloy
+	recentrepo = /Volumes/Dev/Liferay/Trunk/portal
 [alias]
 	ci = commit
 	cia = commit --amend
@@ -37,8 +37,8 @@
 	db = "!sh -c 'git branch -D $0'"
 	db-remote = "!sh -c 'git push origin :$0'"
 	db-all = "!sh -c 'git db $0 && git db-remote $0'"
-	patch-ee = "!f() { local output_dir='/Volumes/Development/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply -v --check $patch_name && git apply $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
-	rpatch-ee = "!f() { local output_dir='/Volumes/Development/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply --reject $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
+	patch-ee = "!f() { local output_dir='/Volumes/Dev/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply -v --check $patch_name && git apply $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
+	rpatch-ee = "!f() { local output_dir='/Volumes/Dev/Branches/6.0.x/liferay-portal-ee-6.0.x'; local patch_name="$output_dir/$1.patch"; local to_rev="${1}^"; git diff -p --full-index $to_rev $1 > $patch_name; cd ${output_dir}; git apply --reject $patch_name && echo "patch applied"; cd - > /dev/null; }; f"
 	push-all = "!git push origin && git push upstream;"
 	pbo = "!git push origin $(git name-rev --name-only HEAD)"
 	pu = pull upstream
