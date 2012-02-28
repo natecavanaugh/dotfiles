@@ -1,0 +1,17 @@
+#!/bin/sh
+
+base_path="${NC_TRUNK_DEV_PATH}"
+
+if [[ -n "$1" ]]; then
+	if [[ $1 == "60" ]]; then
+		base_path="${NC_BRANCHES_PATH}/6.0.x"
+	elif [[ $1 == "52" ]]; then
+		base_path="${NC_BRANCHES_PATH}/5.2.x"
+	elif [[ $1 == "maint" ]]; then
+		base_path="${NC_TRUNK_MAINT_PATH}"
+	fi
+fi
+
+base_path="${base_path}/tomcat/bin/catalina.sh run"
+
+$base_path

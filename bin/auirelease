@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cd /Volumes/Dev/Work/Alloy;
+ant release;
+cp alloy-1.0pr.zip /Volumes/Dev/Liferay/Trunk/portal/portal-web/third-party/;
+cd /Volumes/Dev/Liferay/Trunk/portal/portal-web/;
+ant build-alloy;
+cd -

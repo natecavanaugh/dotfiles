@@ -1,0 +1,16 @@
+#!/bin/bash
+
+base_path="${NC_ALLOY_EE1_PATH}"
+base_liferay_path="${NC_BRANCHES_PATH}/6.0.x"
+
+cd $base_path;
+
+ant release;
+
+cp alloy-*.zip "${base_liferay_path}/portal/portal-web/third-party/";
+
+cd "${base_liferay_path}/portal/portal-web/";
+
+ant build-alloy;
+
+touch -c "${base_liferay_path}/portal/portal-web/docroot/html/portal/css.jsp";

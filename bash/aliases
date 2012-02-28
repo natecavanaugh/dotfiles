@@ -8,13 +8,7 @@ alias mlog="tail -f /var/log/mail.log"
 alias pfs="sudo postfix start"
 
 # Utility
-alias sub='open -a "Sublime Text 2"'
-alias tw='watchr autotest.watchr'
-alias reload='source ~/dotfiles/bashrc'
-alias ea="$EDITOR ~/dotfiles/bash/aliases && reload" # Edit aliases
-alias ee="$EDITOR ~/dotfiles/bash/env"
-alias mg="mate . && gitx"
-function d { cd ~/htdocs/$1; }
+alias sbp='source ~/.bash_profile'
 
 # Tar
 alias tx="tar -xvzf"
@@ -24,105 +18,243 @@ alias tu="top -o cpu" # cpu
 alias tm="top -o vsize" # memory
 
 # Git
-alias g="git status"
-alias gb="git branch"
-alias gba="git branch -a"
-alias gc="git commit -v"
-alias gca="git commit -v -a"
-alias gco="cat .git/config"
-alias gco="git checkout"
-alias gd="git diff"
-alias gl="git pull --rebase"
-alias gp="git push"
-alias gperm="find . -name \".git\" -exec git config -f '{}/config' core.filemode false \;"
-alias gsd="git svn dcommit"
-alias gsr="git svn rebase"
-alias upsvn="git checkout master; gsr"
-alias cdev="git checkout dev"
-alias cmaster="git checkout master"
+alias g="git"
+alias gs="git status"
+alias gitk="/usr/bin/wish $(which gitk)"
 
-#MySQL
+# Open connection to Web timesheet
+function wts {
+	ssh -f -N -L 9000:192.168.95.92:80 nathan.cavanaugh@vpn-2.liferay.com;
+	open http://localhost:9000/cgi/rt.dll
+	echo "SSH Connection to Web Timesheet is open."
+}
+
+# Close connection to Web timesheet
+function cwts { 
+	PID=$(ps ax | grep "ssh -f -N -L" | grep -v grep | awk '{ print $1 }')
+
+	if [[ -n $PID ]]; then
+		kill -9 $PID
+	fi
+
+	echo "SSH Connection to Web Timesheet is closed."
+}
+
+# MySQL
 function mysqlexec {
 	mysql -u root -p -e "$1";
-};
+}
+
 function createdb {
 	mysqlexec "create database \`$1\` CHARACTER SET utf8;";
 }
+
 function dropdb {
 	mysqlexec "drop database if exists \`$1\`;";
 }
+
 function cleardb {
-	mysqlexec "drop database if exists \`$1\`; create database \`$1\` CHARACTER SET utf8;"
+	mysqlexec "drop database if exists \`$1\`; create database \`$1\`
+CHARACTER SET utf8;"
 }
 
 function git_track() {
 	echo "\n[branch \"$1\"]\n\tremote = origin\n\tmerge = refs/heads/$1" >> ".git/config"
 }
 
-function gta() {
-  git tag -a "v$1" -m "tagging version $1"
+# Navigation
+function cdl {
+	cd $1;
+	ls -l
 }
 
-# Setup a tracking branch from [remote] [branch_name]
-function gbt() {
-  git checkout -b $2 -t $1/$2
+function upl {
+	cdl ..
 }
 
-# Setup a tracking branch from origin [branch_name]
-function gbto() {
-  git checkout -b $1 -t origin/$1
+function up {
+	path="../";
+
+	if [[ -n $1 ]]; then
+		strpath=$( printf "%${1}s" );
+		path=" ${strpath// /$path}"
+	fi
+
+	cd $path
 }
 
-function git_tmbundle() {
-	git remote add "$1_remote" $2
-	git fetch "$1_remote"
-	git checkout -b "$1_branch" "$1_remote/master"
-	git push origin "$1_branch"
-	git checkout master
-	git read-tree --prefix="$3.tmbundle/" -u "$1_branch"
-	git commit -m "added $3 bundles"
+function le {
+	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' ${1:-*}
 }
 
-# Ruby
-alias be="bundle exec"
-alias rk="rake"
-alias bp="bluepill --no-privileged"
-alias it="RAILS_ENV=test infinity_test"
-
-# Rails
-alias r="rails"
-alias rp="touch tmp/restart.txt"
-alias tl="tail -f log/*.log"
-alias rt="clear && RAILS_ENV=test bundle exec rspec"
-alias rts="clear && RAILS_ENV=test bundle exec spec"
-alias rcc="RAILS_ENV=test cucumber"
-alias sc="./script/console"
-alias ss="./script/server"
-alias pas="passenger start"
-function dg { cd /Library/Ruby/Gems/1.8/gems/$1; }
-
-# LaunchD
-function lrs() {
-  sudo launchctl stop $1
-  echo "Stopping $1..."
-  sleep 2
-  echo "Starting $1..."
-  sudo launchctl start $1
+# Process finder
+# @argument name of process
+function pf {
+	ps ax | grep "$1" | grep -v grep | awk '{ print $1 }'
 }
 
-# Coffee
-alias cw="coffee --no-wrap -cw"
-
-# Create new app from template
-function rt() {
-  rails $* -m "http://github.com/wilkerlucio/rails_template/raw/master/template.rb"
+# Process killer
+# @argument name of process
+function pfkill {
+	pf $1 | xargs kill -9
+	#ps -ef | grep PROCESS | grep -v grep | awk '{print $2}' | xargs kill -9
 }
 
-# Open Nginx configuration
-alias ngc="$EDITOR /opt/nginx/conf/nginx.conf && ngr"
+# Kill java :(
+function pfkj {
+	pfkill "java"
+}
 
-# Restart Nginx
-function ngr() {
-	sudo /opt/nginx/sbin/nginx -s stop
-	sudo /opt/nginx/sbin/nginx
+# Simpler grep
+# @argument (optional) path
+function gr {
+	grep -R "$1" "${2:-.}"
+	# echo $1 ${2:.}
+}
+
+# Set up simple server
+function server () {
+  open "http://localhost:${1}" && python -m SimpleHTTPServer $1;
+}
+
+# Personal
+
+alias ls='lsc --color'     #set the color settings on in the color ls program
+alias l='lsc --color -lg'
+alias ll='lsc --color -lag  | more'
+
+# -- Paths
+
+# Volume paths
+alias vde='cd $NC_DEV_PATH;'
+alias vda='cd $NC_DATA_PATH;'
+
+# Liferay paths
+alias ,ld='cd $NC_TRUNK_DEV_PATH;'
+alias lde=,ld
+alias ,lp='cd ${NC_TRUNK_PORTAL_PATH};'
+alias ,lpw='cd ${NC_TRUNK_PORTAL_PATH}/portal-web;'
+alias ,lpi='cd ${NC_TRUNK_PORTAL_PATH}/portal-impl;'
+alias ,lph='cd ${NC_TRUNK_PW_HTML_PATH};'
+alias ,lpt='cd ${NC_TRUNK_PW_HTML_PATH}/themes;'
+alias ,lpj='cd ${NC_TRUNK_PW_HTML_PATH}/js/liferay;'
+alias ,lpc='cd ${NC_TRUNK_PW_HTML_PATH}/portal/css;'
+
+alias l60='cd $NC_BRANCHES_PATH/6.0.x;'
+alias l60p='cd $NC_BRANCHES_PATH/6.0.x/portal;'
+
+alias l61='cd $NC_BRANCHES_PATH/6.1.x;'
+alias l61p='cd $NC_BRANCHES_PATH/6.1.x/portal;'
+
+alias l52='cd $NC_BRANCHES_PATH/5.2.x;'
+alias l5p='cd $NC_BRANCHES_PATH/5.2.x/portal;'
+
+# Alloy paths
+alias aui='cd $NC_ALLOY_PATH;'
+alias aui1='cd $NC_ALLOY_EE1_PATH;'
+alias aui15='cd $NC_ALLOY_EE15_PATH;'
+
+alias myg='cd $NC_GIT_HOME;'
+
+alias auibuild='cd ${NC_ALLOY_PATH}/build'
+alias auidemos='cd ${NC_ALLOY_PATH}/demos'
+alias auisrc='cd ${NC_ALLOY_PATH}/src'
+
+alias cbin='cd $NC_BIN_PATH'
+
+# -- Commands
+
+# Ant
+alias aa='ant all'
+alias ad='ant deploy'
+alias acd='ant clean deploy'
+alias abt='ant build-themes'
+alias abm='ant build-modules'
+alias abs='ant build-skins'
+alias abm='ant build-modules'
+alias abaf='ant build-alloy'
+alias aba='touch -c third-party/alloy-1.0.1.zip && abaf'
+
+# Misc
+
+# Search history
+alias hs="history|grep"
+
+# QuickLook file
+alias qlf='qlmanage -p "$@" >& /dev/null'
+
+# Find file by name
+alias fn='find . -name '
+
+# Shortcut to SublimeText 2 cli
+alias so='~/Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl'
+
+# Replace Sublime icon
+alias subicon='sudo cp ~/Documents/Sublime\ Text\ 2.icns  ~/Applications/Sublime\ Text\ 2.app/Contents/Resources/'
+
+
+# Functions
+
+# Extract Git commit ID from generated alloy zip
+# @argument path to zip
+function az {
+	if [[ ! $1 =~ '.zip'$ ]]; then
+		echo "This command only works with zip files :)"
+		return 1;
+	fi
+
+	delfile=0
+
+	name=$1
+	if [[ $1 == *:* ]]; then
+		treeish=$1
+		name="/tmp/alloy_${RANDOM}.zip"
+		delfile=1
+		git show -p $treeish > $name
+	fi
+
+	unzip -z $name;
+	
+	[[ $delfile == 1 ]] && rm $name;
+}
+
+function auis_impl {
+	cd $1;
+	git log -1 --format="%h" | tr -d '\n'
+}
+
+function auis () {
+	auis_impl ${NC_ALLOY_PATH}
+}
+
+function auisee () {
+	auis_impl ${NC_ALLOY_EE1_PATH}
+}
+
+function auic () {
+	sha=$(auis)
+	echo $sha | tr -d '\n' | pbcopy && echo "Copied $sha to clipboard."
+}
+
+function auicee () {
+	sha=$(auisee)
+	echo $sha | tr -d '\n' | pbcopy && echo "Copied $sha to clipboard."
+}
+
+# Get Last JIRA ID from the 
+function jid {
+	git log -1 --oneline | grep -Eo "([A-Z]{3,}-)([0-9]+)"
+}
+
+function mjid {
+	echo "`jid` - ${1:-Source formatting}"
+}
+
+function jspfcss () {
+	cd "${NC_TRUNK_PW_HTML_PATH}/portal/css";
+	filelist=''
+	for f in `ls -R | grep -E '.jspf'`; do 
+		filelist="$filelist '$f',";
+	done
+	echo $filelist
 }

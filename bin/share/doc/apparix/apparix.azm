@@ -1,0 +1,986 @@
+\import{pud/man.zmm}
+
+\setx{"year"}{\zinsert{stamp.year}}
+\setx{"month"}{\zinsert{stamp.month}}
+\setx{"day"}{\zinsert{stamp.day}}
+\setx{"tag"}{\zinsert{stamp.tag}}
+\setx{"stamp"}{\zinsert{stamp.stamp}}
+
+\setx{"year"}{\tr{{delete}{[:space:]}}{\"year"}}
+\setx{"month"}{\tr{{delete}{[:space:]}}{\"month"}}
+\setx{"day"}{\tr{{delete}{[:space:]}}{\"day"}}
+\setx{"stamp"}{\tr{{delete}{[:space:]}}{\"stamp"}}
+\setx{"tag"}{\tr{{delete}{[:space:]}}{\"tag"}}
+
+\setx{"tag"}{\"tag", \"stamp"}
+
+\begin{pud::man}{
+
+   {name}{apparix}
+   {html_title}{apparix, augmenting the shell with directory bookmarks}
+   {keywords}{cd, change directory, bookmarks, command line, cdpath, subdirectory, tab completion}
+   {author}{Stijn van Dongen}
+   {section}{1}
+   {synstyle}{long}
+   {defstyle}{long}
+
+   {year}{\"year"}
+   {day}{\"day"}
+   {month}{\"month"}
+   {stamp}{\"stamp"}
+   {tag}{\"tag"}
+}
+
+\${html}{\"pud::man::maketoc"}
+
+\def{apparix}{\bf{apparix}}
+
+\sec{name}{NAME}
+\NAME{apparix}{augmenting cd with bookmarks}
+
+
+\sec{synopsis}{SYNOPSIS}
+
+\par{
+   Apparix allows you to bookmark directories and later jump to them using the mark.
+
+   By default apparix acts as a replacement for \it{cd} and can be used in the
+   same manner, including the special behaviour for \it{cd} without argument
+   and \it{cd}\~\tt{-}.
+
+   It is possible to directly jump to subdirectories of a bookmarked directory.
+
+   The contributed bash completion code facilitates completion both on
+   bookmarks and directories, but can be adjusted to accomodate other
+   preferences.
+
+   }
+
+\par{
+   This manual page suffers from an excess in verbosity due to the many
+   examples, explanations of the bells and whistles, and comparisons with other
+   approaches to bookmarking. The fundamental idea is simply that typing a
+   string of your own choosing takes you to the directory associated with it.
+   Apparix does little more than maintaining a list of keys and values.
+   It obtains directory names and listings, associates
+   path names (values) with bookmarks (keys), and has some facilities for
+   manipulating keys and values. The functions involving apparix
+   (\bf{bm}, \bf{to}, and \bf{portal}) provide the user interface.
+   Other functions, \bf{als} (apparix ls) and \bf{ae} (apparix edit)
+   are discussed on the main apparix page \httpref{http://micans.org/apparix}.
+   }
+
+\sec{gs}{GETTING STARTED}
+\par{
+   Install apparix. This should be as easy as \v{./configure --prefix=$HOME/local && make && make install},
+   or perhaps a pre-packaged apparix is available for your system.
+
+   Then get hold of the \bf{to}, \bf{bm} and \bf{portal} shell handles. These
+   are either aliases or functions depending on your shell. Currently csh-style
+   shells and bash are supported.
+   Get the ones you need preferably from
+   \httpref{http://micans.org/apparix/#shell}.  For a more limited set of
+   commands either visit the \secref{files} section, or issue \v{apparix
+   --shell-examples}. Activate them by simply pasting them in a shell or adding
+   them to the appropriate resource file, e.g.  \v{$HOME/.cshrc} or
+   \v{$HOME/.bashrc} (do not forget to \it{source} the resource file). The
+   handles \bf{to}, \bf{bm} and \bf{portal} can of course be changed to any
+   name desired. With these preliminaries, the following is a mock-up shell
+   navigation session.
+
+   }
+
+\verbatim{\:/
+   > \bf{pwd}
+   /home/eez/cvs/xyz/tfa/faq/zut/bar/foo
+   > \bf{ls}
+   src/ doc/ CVS/ bin/
+   > \bf{bm xkr}       # bookmark as xkr (funny name though)
+   > \bf{bm}           # bookmark as foo (trailing component is default)
+(later)
+   > \bf{to xkr}       # cd to /home/eez/cvs/xyz/tfa/faq/zut/bar/foo
+(alternatively)
+   > \bf{to xkr src}   # cd to /home/eez/cvs/xyz/tfa/faq/zut/bar/foo/src
+(alternatively)
+   > \bf{to foo}       # cd to /home/eez/cvs/xyz/tfa/faq/zut/bar/foo
+
+(later)
+   > \bf{ls}
+   aap pyu/ qua tim/ zut/
+   > \bf{pwd}
+   /home/eez/another/branch/deep/down/under
+   > \bf{portal}       # bookmark as portal, imports tim zut pyu bookmarks
+   added flock of 3 in portal /home/eez/another/branch/deep/down/under
+
+(later)
+   > \bf{to zut}       # cd to /home/eez/another/branch/deep/down/under/zut
+
+(later)
+   > \bf{apparix}   # show all bookmarks
+   --- portals
+   e              /home/eez/another/branch/deep/down/under
+   --- expansions
+   j pyu          /home/eez/another/branch/deep/down/under/pyu
+   j tim          /home/eez/another/branch/deep/down/under/tim
+   j zut          /home/eez/another/branch/deep/down/under/zut
+   --- bookmarks
+   j xkr          /home/eez/cvs/xyz/tfa/faq/zut/bar/foo
+   j foo          /home/eez/cvs/xyz/tfa/faq/zut/bar/foo}
+
+
+\car{
+   In the last example apparix simply shows all its bookmarks.  The first batch
+   shows portals. The second batch shows secondary bookmarks expanded from
+   portals. The third batch shows all regular bookmarks.
+
+   }
+
+
+\par{
+   In the default definitions of \bf{to} it falls back to regular \it{cd}
+   behaviour in case a mark is not found.  This is done by instructing apparix
+   to check whether the mark exists as the name of a directory.  It is possible
+   to do this either before or after bookmark lookup, or not at all. By default
+   the bash completion code takes into account both bookmarks and directories.
+
+   }
+
+
+\par{
+   Apparix also allows subdirectory specification of bookmarked locations. If
+   this is combined with the bash completion code it yields a powerful way of
+   navigating container directories, i.e. directories that contain a large
+   number of subdirectories.  Refer to the \secref{sub} section.
+
+   }
+
+\cpar{Further options}{
+   \synoptopt{--add-mark}{add jump bookmark}
+   \synoptopt{--add-portal}{add portal bookmark}
+   \synoptopt{-sm}{<mark>}{squash repeated marks}
+   \synoptopt{-sd}{<mark>}{squash repeated destinations}
+   \synoptopt{-lm}{<mark>}{list bookmarks with this mark}
+   \synoptopt{-ld}{<mark>}{list destinations with mark indirection}
+   \synoptopt{-favour}{<list>}{duplicate resolution policy}
+   \synoptopt{-pick}{<num>}{immediate duplicate resolution}
+   \synoptopt{-purge}{pat}{delete bookmarks}
+   \synoptopt{-purge-mark}{pat}
+   \synoptopt{-d}{dump resource file to STDOUT}
+   \synoptopt{-l}{list available jumps}
+   \synoptopt{-u}{<num>}{remove last <num> additions}
+   \synoptopt{--rehash}{re-expand portal bookmarks}
+   \synoptopt{--bu}{create backup of resource file}
+   \synoptopt{-bu}{<fname>}{create backup in <fname>}
+   \synoptopt{--cwd}{use getcwd(3), not pwd(1)}
+   \synoptopt{--shell-examples}{output example macros}
+}
+
+
+\sec{description}{DESCRIPTION}
+
+\par{
+   Apparix combines the properties of the
+   \aref{http://www.skamphausen.de/cgi-bin/ska/CDargs}{cdargs} utility and the
+   CDPATH shell mechanism for fast navigation through the file system. It can
+   additionally act as the regular \it{cd} command. It is especially useful for
+   visiting and documenting both often- and rarely-used locations.  Apparix
+   enables you to attach marks to locations and jump to those locations by
+   loading the mark. Marking, unmarking and jumping are simple operations that
+   are performed in the shell. All actions take effect immediately in all
+   shells running.  By setting up convenient aliases for marking and jumping
+   the file system can be navigated in a fast and intuitive manner.  The
+   \secref{files} section lists aliases for csh-type shells and functions for
+   bash, including the setup to equip the \bf{to} function with argument
+   completion in bash.
+
+   }
+
+\par{
+   This section contains some examples of the most common uses
+   of apparix.
+   \secref{options} contains a list of additional options available
+   for listing, pruning, and squashing bookmarks.}
+
+\par{
+   \secref{notes} features a brief discussion of the advantages
+   of apparix over other approaches such as setting up aliases for
+   often visited directories, using symlinks, CDPATH, or a combination
+   of these. \secref{history} explains the difference between
+   cdargs and apparix.
+   The sections \secref{dup}, \secref{sub}, \secref{tab},
+   \secref{mov}, \secref{list}, and \secref{cd}
+   further below are also recommended reading.}
+
+\par{
+   Apparix works in a manner similar to cdargs. One usually invokes
+   apparix by using pre-defined aliases. Here they will be called \bf{bm} for
+   bookmark, \bf{portal} for a CDPATH-style bookmark and \bf{to} for initiating
+   an apparition (aka jump).
+   These aliases are found below in the \secref{files}
+   section and can also be obtained by issuing}
+
+\verbatim{apparix --shell-examples}
+
+\par{
+   Suppose your user name is \it{eez} and your home directory is \v{/home/eez}.
+   You often visit a directory called
+   \v{/home/eez/cvs/xyz/tfa/faq/zut/bar/foo}.
+   This is how to create and use a bookmark for foo}
+
+\verbatim{\:/
+/home/eez/cvs/xyz/tfa/faq/zut/bar/foo> \bf{bm foo}
+added: foo -> /home/eez/cvs/xyz/tfa/faq/zut/bar/foo
+/home/eez/cvs/xyz/tfa/faq/zut/bar/foo> \bf{cd}
+/home/eez> \bf{to foo}
+/home/eez/cvs/xyz/tfa/faq/zut/bar/foo>}
+
+\car{
+   If one bookmarks a directory by its trailing component as happened in
+   this case, it is not necessary to specify the mark. By default apparix
+   will use the trailing component as the mark. So}
+
+\verbatim{\:/
+/home/eez/cvs/xyz/tfa/faq/zut/bar/foo> \bf{bm}
+added: foo -> /home/eez/cvs/xyz/tfa/faq/zut/bar/foo}
+
+\car{gives the same result.}
+
+\par{
+   Another scenario is where you have some directory that contains a largish
+   number of subdirectories, all of which you would like to have bookmarked.
+   If the subdirectories have distinctive names this can be achieved in
+   one fell swoop by marking the parent directory as a \it{portal}. This is
+   similar to adding the parent directory to the CDPATH environment variable,
+   except that apparix bookmarks are not part of the cd namespace. It is
+   argued in \secref{notes} that this is a good thing.
+   Consider this:}
+
+\verbatim{\:/
+/home/cvs/bagger/boemel/mcl/mcl/src> \bf{ls}
+alien/       CVS/         impala/      Makefile.am  README       shmcx/
+attic/       giraffe/     lib/         Makefile.in  shcl/        shmx/
+contrib/     gmon.out     Makefile     mcl/         shmcl/       taurus/}
+
+\car{
+   Some of the subdirectories have not-so-distinct names such as \it{contrib} and
+   \it{attic}, but they happen to be the directories least visited.
+   Issuing:}
+
+\verbatim{\:/
+/home/cvs/bagger/boemel/mcl/mcl/src> \bf{portal}
+[apparix] expanded 1 portal to 12 destinations}
+
+\car{
+   yields all of the subdirectories as destinations bookmarked by the last
+   component of their path name.
+   Incidentally, directory names such as \v{CVS} can be explicitly excluded
+   from expansion by setting the environment variable \v{APPARIXEXCLUDE}
+   appropriately \- refer to section \secref{environment}.
+   }
+
+\par{
+   Bookmarks resulting from portal expansion are kept in a separate
+   resource file (see \secref{files}). Portal expansions can be recreated
+   by issuing}
+
+\verbatim{apparix --rehash}
+
+\car{
+   This is useful to reflect a change in the directory naming structure
+   underneath a portal.}
+
+\sec{dup}{duplicate resolution}
+
+\par{
+   Apparix allows identical bookmarks to point to different locations.
+   When asked to visit such a bookmark it will by default
+   present a list of options.}
+
+\par{
+   The \genoptref{-favour}{<list>} option can be used to automate
+   resolution. \usearg{<list>} is a sequence of single characters,
+   described further below.
+   The order in which they are given denote the order in which
+   resolution rules are applied. This option is typically used
+   in the definition of the \bf{to} function/alias or
+   in the bash completion code.}
+
+\par{
+   The \genoptref{-pick}{<num>} option is used to resolve to a particular
+   directory directly. This is useful when you already know where you want to
+   go, and typically used for the \v{now} bookmark in conjunction with the bash
+   \v{whence} function. Use \v{whence now} to see an indexed list of now
+   bookmarks. It is possible to go to the desired directory by entering the
+   bookmark index. It is possible to bypass the selection step by specifying
+   \v{whence now N}.
+   }
+
+\par{
+   Duplicates are allowed because it can be useful to overwrite a bookmark with
+   a new location. The old bookmark is kept as a matter of policy. Use
+   \genoptref{-sm} to explicitly squash duplicates.
+   }
+
+\begin{itemize}{
+   {flow}{compact}
+   {interitem}{1}
+}
+\item{l}
+\car{
+   \it{level}; prefer paths with fewer components.}
+
+\item{L}
+\car{
+   reverse of the above.}
+
+\item{o}
+\car{
+   \it{bookmark order}; prefer older entries.
+   Entries appearing earlier in the file are considered older,
+   but the actual date of creating the bookmark is not stored.
+   Refer to \secref{edit} for more information.}
+
+\item{O}
+\car{
+   reverse of the above.}
+
+\item{r}
+\car{
+   \it{regular first}; prefer regular bookmarks over portal expansion.}
+
+\item{R}
+\car{
+   reverse of the above.}
+
+\end{itemize}
+
+\par{
+   If there are still ties after the specified rules have
+   been applied apparix will simply take the first matching
+   option. This behaviour cannot be further specified
+   as the program uses a non-stable ordering routine.}
+
+\par{
+   It is an absolute prerequisite that \genoptref{-favour} is used in the bash
+   completion code. Otherwise completion will fail (for a duplicated bookmark)
+   while apparix is waiting for input. Refer to the tab completion description
+   below.}
+
+\sec{sub}{subdirectory specification}
+
+\par{
+   When jumping (apparating) you can specify an additional subdirectory
+   after the bookmark. Apparix will append the subdirectory to
+   the destination.}
+
+\par{
+   This is useful for projects with directory nodes corresponding
+   with versions. Assume you have a directory structure such as this:}
+
+\verbatim{\:/
+   /x/y/z/OpusMagnum/v1/
+   /x/y/z/OpusMagnum/v2/
+   /x/y/z/OpusMagnum/v3/}
+
+\par{
+   It is probably easiest to simply bookmark the OpusMagnum directory
+   in some way (say with bookmark \v{om}). You can then issue
+   \vq{to om v2} to jump to \v{OpusMagnum/v2}. This is more flexible
+   and maintainable than creating bookmarks \v{om1}, \v{om2}, \v{om3}.
+   One could add OpusMagnum as a portal, but with generic names such
+   as \v{v1} this is not a very extendible approach.}
+
+
+\par{
+   See also the tab completion description below - it is possible
+   to tab-complete on subdirectories of the apparix jump directory.}
+
+
+\sec{tab}{tab completion}
+
+\par{
+   The bash tab completion code does two things. First, it is possible to
+   tab-complete on apparix bookmarks themselves, showing a listing of all
+   available bookmarks (or iterating through them in cyclic mode, depending on
+   your bash settings). Second, once a bookmark has been given tab completion
+   will list or iterate over all the subdirectories of the directory associated
+   with that bookmark.  Specifying a string after the bookmark will limit
+   tab-completion to directories matching the shell-pattern in string.
+   \it{Very} useful.}
+
+\par{
+   Be careful to not remove the \genoptref{-favour}{list} option
+   from the bash completion code. It is necessary to resolve
+   duplicate bookmarks.
+}
+
+\sec{edit}{editing bookmarks}
+
+\car{
+   Apparix appends new bookmarks to the end of the .apparixrc file. Nothing
+   stops you from editing the file, and this is in fact recommended if for
+   example you need to get rid of a bookmark and neither of \genoptref{-purge},
+   \genoptref{-purge-mark}, \genoptref{-sd},
+   \genoptref{-sm} fulfills your needs.  It was an easy design choice
+   not to equip apparix with editor capabilities.}
+
+\sec{mov}{copying and moving files}
+
+\par{
+   It is straightforward to copy or move files to locations known
+   by apparix. Examples:}
+
+\verbatim{BASH and variants
+   cp FOO $(apparix zoem)
+   mv BAR $(apparix zoem doc)
+   mv BAR $(apparix zoem doc)/test
+   
+CSH and variants
+   cp FOO `apparix zoem`
+   mv BAR `apparix zoem doc`/test}
+
+
+\sec{list}{listing bookmarks}
+
+\par{
+   Simply issuing apparix gives you a list of bookmarks grouped into three
+   categories, portals, expansions, and bookmarks.  Use the \genoptref{-d} option
+   to dump the resource file to STDOUT exactly as it is. This can be useful
+   when you intend to use the \genoptref{-u}{num} option to remove bookmarks or
+   portals that were most recently added.}
+
+\par{
+   Use \genoptref{-l} to list all available jumps without their destinations.
+   The jumps are grouped into expansions resulting from portals and
+   regular bookmarks.}
+
+
+\: \car{
+\:    Apparix currently uses \it{getcwd}(3) to obtain the path name
+\:    of the current directory. On some machines this may include
+\:    funny mount components, e.g.
+\: }
+\: 
+\: \verbatim{\:/
+\: \bf{/.automount/eek/root}/home/eez/cvs/xyz/tfa/faq/zut/bar/foo}
+\: 
+\: \car{
+\:    Until apparix obtains a 
+\: }
+
+
+\sec{cd}{replacing cd}
+
+\par{
+   With the supplied definition(s) of \bf{to}, apparix will first see whether
+   the mark is the name of a directory, accessible from the current directory.
+   A directory is accessible if it would be a valid argument to cd, so it need
+   not necessarily be a subdirectory of the current directory.  If the mark is
+   not an accessible directory, apparix will then try to do a lookup of the
+   mark in the bookmark files.  This behaviour can be inverted to do the lookup
+   first and the current directory thereafter. Both modes can be used to make
+   \bf{to} a drop-in replacement for \it{cd}.  Additionally and again similar
+   to \it{cd}, \tt{'to -'} will take you to the previous directory, and
+   specifying \tt{to} without arguments will take you to your home directory.
+
+   }
+
+\par{
+   The bash completion code acts accordingly, and should transparently
+   complete on both marks and directories.
+   }
+
+\sec{options}{OPTIONS}
+
+\par{
+   For bookmarking and jumping apparix is best invoked by using the aliases
+   (tcsh-variants) or functions (sh/bash) listed in \secref{files}.
+   Apparix has a few options that are useful for pruning, squashing and
+   rehasing bookmarks. These are best issued by invoking apparix directly.}
+
+\par{
+   If you are interested in marks or destinations matching a certain pattern,
+   simply issue apparix without arguments and pipe it through
+   your program of choice.}
+
+\par{
+   Unary options (those without arguments) usually start with two hyphens
+   except for standardized options such as \genoptref{-h}.
+   Options that take an argument can be converted to a unary key=value notation,
+   e.g. \useopt{-purge-mark}{foo} is equivalent to \usekvp{--purge-mark}{foo}.}
+
+\par{
+   When invoked without arguments apparix will simply dump its bookmarks.}
+
+\begin{itemize}{
+   {flow}{cascade}
+   {interitem}{1}
+}
+\item{\defopt{--add-mark}{add jump bookmark}}
+\car{
+   This options expects trailing \it{[mark [destination]]} argument(s).
+   Both arguments are optional. If a single argument is given it
+   is interpreted as a bookmark name to be mapped to the current directory.
+   If two arguments are given the last argument is taken  as the
+   target directory. If no argument is given apparix will enlist
+   the current directory as a target bookmarked by the trailing component
+   of the directory path.}
+
+\item{\defopt{--add-portal}{add portal bookmark}}
+\car{
+   This option enlists a directory as a portal and adds all subdirectories
+   as bookmarks. The name of the bookmark is simply the name of the
+   subdirectory. By default the current directory is added as a portal.
+   An optional trailing argument will override this behaviour and
+   instead be interpreted as the portal location.}
+
+
+\item{\defopt{--try-current-first}{try current directory before lookup}}
+\car{
+   This option is useful in the definition of the \bf{to} wrapper.  Before
+   attempting any lookup of the mark, apparix tests whether the supplied mark
+   exists as a subdirectory in the current directory. If it does,
+   the mark is simply expanded to itself.
+   }
+
+
+\item{\defopt{--try-current-last}{try current directory if lookup fails}}
+\car{
+   This option is useful in the definition of the \bf{to} wrapper. If
+   lookup of the mark fails, apparix tests whether the supplied mark
+   exists as a subdirectory in the current directory. If it does,
+   the mark is simply expanded to itself.
+   }
+
+
+\item{\defopt{--notify-current}{notify if current directory is used}}
+\car{
+   This option is useful in the definition of the \it{bf} wrapper
+   in conjunction with either \genopt{--try-current-first}
+   or \genopt{--try-current-last}.
+   If the mark is found as a subdirectory in the current directory,
+   apparix notifies the user of this fact (on the diagnostic stream).
+   }
+
+
+\item{\defopt{-sm}{<mar>}{squash repeated marks}}
+\car{
+   Apparix will squash bookmarks with mark \v{<mark>}.
+   This is useful when a mark points to a versioned project, and the
+   project is updated to a new version and a new directory.}
+
+\par{
+   Apparix will by default keep the last one occurring in the resource
+   file (corresponding with \useopt{-favour}{O}).  This option respects the
+   \genoptref{-favour} option if given.  Duplicating an already existing mark
+   can be useful when it identifies a project for which the underlying
+   directory changes every once in a while (e.g. the project is downloaded from
+   external sources and comes with version information). It is not strictly
+   necessary to squash bookmarks since \bf{to} functions/macros that are
+   equipped with the \genoptref{-favour} option will generally resolve
+   duplicate matches.
+   }
+   
+\item{\defopt{-sd}{<mark>}{squash repeated destinations}}
+\car{
+   All other bookmarks with the same destination as \v{<mark>} are removed.
+   This is useful when a given destination has acquired multiple
+   bookmarks and you decide to settle on a favourite.
+   }
+
+\item{\defopt{-lm}{<mark>}{list bookmarks with this mark}}
+\car{
+   It lists all bookmarks \v{<mark>} (noting that it may point to
+   multiple locations).
+   }
+
+\item{\defopt{-ld}{<mark>}{list repeated destinations}}
+\car{
+   This lists all bookmarks \v{<mark>} (noting that it may point to
+   multiple locations) and additionally lists all other bookmarks that share
+   the destination with any of the first bookmarks.  This allows one to predict
+   the effect of issuing \v{apparix -sd <mark>}.
+   }
+
+\item{\defopt{-purge}{pat}{delete bookmarks}}
+\car{
+   This deletes bookmarks where destination matches \genarg{pat}.
+   All deleted bookmarks are printed to STDOUT. Thus if you regret
+   deleting a bookmark it is easy to add it back. Portal specifications
+   are never affected.}
+
+\item{\defopt{-purge-mark}{pat}}
+\car{
+   This deletes bookmarks where mark matches \genarg{pat}.
+   Portal specifications are never affected.}
+
+\item{\defopt{-d}{dump resource file to STDOUT}}
+\car{
+   Dump resource file to STDOUT.}
+
+\item{\defopt{-l}{list available jumps}}
+\car{
+   List available jumps paragraph-style. Portal specifications themselves
+   are excluded, and regular jumps and jumps resulting from portal expansions
+   are listed under different headers.}
+
+\item{\defopt{-u}{<num>}{remove last <num> additions}}
+\car{
+   Remove last <num> additions. Portal specifications and regular
+   jumps are treated alike.}
+
+\item{\defopt{--rehash}{re-expand portal bookmarks}}
+\car{
+   Apparix will reread the resource file and reexpand portal
+   locations. Useful if directories have been added, renamed,
+   or removed. Refer to section \secref{environment} for  the effect
+   that the environment variable \v{APPARIXEXCLUDE} has on portal expansion.}
+
+\items{
+   {\defopt{-favour}{<list>}{set duplicate resolution policy}}
+   {\defopt{-pick}{<num>}{immediate duplicate resolution}}
+}
+\car{
+   These options have a section to themselves. Refer to \secref{dup}.}
+
+\item{\defopt{--cwd}{use getcwd(3), not pwd(1)}}
+\car{
+   By default aparix uses the program \it{pwd}(1) rather than
+   the system call \it{getcwd}(3). On some systems it was found
+   that the latter results in paths that contain machine-specific
+   mount components.
+   Appparix will use \it{getcwd}(3) when \genoptref{--cwd} is used.}
+
+\item{\defopt{--shell-examples}{output example macros}}
+\car{
+   This outputs example macros. They are also listed in the
+   \secref{files} section though.}
+
+\item{\defopt{--bu}{create backup of the resource file}}
+\car{
+   This creates the backup file in .apparixrc.bu.}
+
+\item{\defopt{-bu}{fname}{create backup of the resource file}}
+\car{
+   This creates the backup file in \genarg{fname}. Use
+   \genoptref{-d} or \useopt{-bu}{-} to dump to STDOUT.}
+
+\items{
+   {\defopt{-h}{show synopsis}}
+   {\defopt{--apropos}{show synopsis}}
+}
+\car{
+   print synopsis of all options}
+
+\end{itemize}
+
+
+\sec{environment}{ENVIRONMENT}
+
+\'begin{itemize}{
+   {flow}{cascade}
+   {interitem}{1}
+}
+\item{APPARIXEXCLUDE}
+\car{
+   This variable specifies exclusion behaviour
+   when portals are expanded with the \v{--rehash} option.
+   It has the following syntax:
+   }
+
+\verbatim{\:/
+   <[:,][<string>]>+}
+
+\car{
+   That is, a list of names with each name preceded by a colon or a comma.
+   A colon indicates that \v{<string>} triggers exclusion of directory names
+   for which the trailing component is identical to \v{<string>}.
+   A comma indicates that \v{<string>} triggers exclusion of directory names
+   for which the trailing component contains \v{<string>} as a substring.
+   Consider:
+   }
+
+\verbatim{\:/
+   export APPARIXEXCLUDE=:CVS:lib,tmp        # A - example
+   export APPARIXEXCLUDE=,                   # B - curiosity}
+
+\car{
+   The first excludes directory names \v{CVS} and \v{lib} and any directory
+   name having \v{tmp} as a substring.
+   The second example will effectively disable portals,
+   as it speficies the empty string which is a substring of all strings.
+   }
+
+
+\item{APPARIXTAG}
+\car{
+   This variable, if set, is incorporated into the names of the
+   apparix resource files. By default these are \v{.apparixrc} and \v{.apparixexpand}.
+   When APPARIXTAG is set to \v{<tag>} they become \v{.<tag>apparixrc} and
+   \v{.<tag>apparixexpand}.
+
+   This can be used e.g. to maintain different sets of bookmarks on different
+   host machines.
+   }
+
+
+\item{APPARIXLOG}
+\car{
+   This variable, if set, is interpreted as the name of a log file.
+   The log file keeps track of all newly added bookmarks and
+   portals without ever deleting anything, in the same format
+   as the \v{.apparixrc} file. If this variable is not set
+   nothing is tracked.
+   }
+
+
+\item{APPARIXPURGE}
+\car{
+   This changes the way apparix dumps purged bookmarks to STDOUT.
+   By default they are dumped as command lines that will reimport
+   the bookmarks if issued (i.e. cut and pasted).
+   By setting this variable to 1 purged bookmarks are dumped
+   in the format used in the \v{.apparixrc} file.
+   }
+
+\end{itemize}
+
+\sec{files}{FILES}
+
+\par{
+   You should use aliases or functions to make apparix really useful.
+   Get them from apparix by giving it the --shell-examples option,
+   or from further below.
+   Note the fragment that provides \bf{to} argument completion in bash.
+}
+
+\begin{itemize}{
+   {flow}{cascade}
+   {interitem}{1}
+}
+\item{$HOME/.apparixrc}
+\car{This is the primary resource file. There is usually no
+need to edit it by hand. Sometimes it can be useful to edit
+by hand to remove an unwanted bookmark; refer to \secref{edit}.}
+
+\item{$HOME/.apparixrc.bu}
+\car{
+   Apparix creates a back-up file whenever it is asked to
+   remove entries from it. Refer
+   to \secref{edit} for options inducing removal.
+   You can explicitly require a backup to be made by
+   either of \genoptref{--bu} or \genoptref{-bu}{fname}.}
+
+\item{$HOME/.apparixexpand}
+\car{
+   This contains bookmarks that are expanded from portals.
+   A portal is simply some directory. The names of all subdirectories
+   are taken as bookmarks that point to those subdirectories.
+   This file can be recreated by issuing}
+
+\verbatim{apparix --rehash}
+
+\items{{$HOME/.bashrc}
+   {$HOME/.tcshrc}
+   {$HOME/.cshrc}
+}
+\car{
+   Add the code you need to the appropriate rc file.  The macros and functions
+   below point \it{cd}(1) in the right direction.}
+
+\end{itemize}
+
+\setx{"examples"}{\system{../src/apparix}{{--shell-examples}}}
+
+\apply{_#1{\!{\verbatim{\1}}}}{{\"examples"}}
+
+\par{More elaborate setups are possible. This CSH-style alias:}
+
+\verbatim{alias to '(test "x" !=  "x\\!*") && cd `(apparix -favour rOl \\!* || echo -n .)` || apparix -l'}
+
+\par{lists all available jumps if invoked without arguments.}
+
+
+\sec{notes}{NOTES}
+\par{
+   Below follow some comments on other approaches to file system navigation.
+   \secref{history} explains the difference between the venerable \bf{cdargs}
+   program and \bf{apparix}.
+}
+
+\par{
+   CDPATH is only useful in cases where a given directory has subdirectories
+   with distinctive names. It does not usually scale well when there are
+   more than a few paths in CDPATH.
+}
+
+\par{
+   Some people use aliases to jump to often visited directories.
+   I was one of them for a period of ten years. The fact is,
+   those aliases are cumbersome to create and remove and they
+   clutter up the alias namespace. They can clash with
+   executable names when the alias includes the \it{cd} part. This sometimes
+   prohibits one from assigning the logical bookmark to a given
+   location, especially when one has a lot of source code locations.
+   They can clash with directory names when
+   the aliases just expand to the location. This again means that
+   sometimes a location cannot be assigned its logical bookmark.
+   I have found that setting \it{cd} jumps aside in their own namespace
+   improves file system navigation by a large factor.
+}
+
+\par{
+   It is also possible to create symlinks to often
+   visited files. Again, creation and removal of these are cumbersome.
+   One could of course create shell functions with a similar interface
+   to apparix or cdargs to handle the symlink lifecycle.
+   On Linux Weekly News \it{nix} suggested to put these symlinks
+   in a single directory and add that directory to CDPATH.
+   This is quite a neat trick and effectively creates a bookmark
+   navigation system.
+}
+
+\par{
+   Still there are problems with the above approach.
+
+   One problem with the symlink approach is that they are a bit
+   awkward to edit. One could make a utility to wrap around the problem,
+   but in the end the directory-with-symlinks would
+   functionally be the same as apparix's \bf{.apparixrc} resource file,
+   only more of a kludge.
+
+   Another problem is that symlinks are awkard when traversing
+   the file system. They confuse the notion of parent directory
+   and '\v{cd ..}' mostly does the unexpected. Sometimes '\v{..}'
+   has a different meaning to \bf{cd} than it has to another application,
+   as one will trace back symlinks and the other will not.
+
+   Finally, a minor objection
+   is that I find it convenient to have bookmarks in a separate
+   namespace than that of \it{cd}(1). Jumps are magical and it is
+   natural to invoke them by a different method. This is in fact
+   how apparix acquired its CDPATH behaviour. I used CDPATH to
+   jump to a few particular source directories with distinct names
+   that lay deeply hidden in some CVS directory. Once I started using
+   apparix however, I would mistakenly issue \it{to} rather than \it{cd}
+   to jump to those locations. My brain classified both types of jump
+   in the same category.
+}
+
+\par{
+   Apparix (and cdargs) have another use besides jumping, namely
+   annotation. Whenever I end up in an esoteric part of the file system and
+   need to make a quick note of the location, I simply bookmark  it.
+}
+
+\par{
+   On SlashDot, that eternal source of wisdom or alternatively
+   the geek wheel of suffering, Clueless Moron offered the following gems.}
+
+\verbatim{\:/
+   mk() { eval ${1:-MKPWD}=\\"`pwd`\\"; }
+   rt() { eval cd \\"\\$${1:-MKPWD}\\";pwd; }
+
+   # type "mk" (as in "mark") and "rt" (as in "return") to mark
+   # a directory and later go back to it.
+   # Or give it a name: do "mk foo", and later on "rt foo"}
+
+\par{
+   This of course is a per-session mechanism, but noteworthy
+   for its simplicity. I am not sure whether csh-style shells
+   could offer an equivalent.}
+
+\par{
+   A feature shared by apparix and cdargs is that adding a bookmark
+   immediately takes effect in all shells. There is no need to
+   source some resource file, as the applications do this everytime
+   they are invoked. It is fast, do not worry.
+}
+
+
+\""{
+
+At LWN nix writes:
+At work I am stuck with ksh, which doesn't have pushd or popd. Solution:
+
+function pushd
+ {
+  PWDSTACK=${PWD}:${PWDSTACK}
+  cd $1
+ }
+
+function popd
+ {
+  cd $(echo ${PWDSTACK:-${PWD}} | cut -d: -f 1)
+  PWDSTACK=$(echo ${PWDSTACK} | cut -s -d: -f 2-)
+ }
+
+function dirs
+ {
+  echo $PWDSTACK | tr ":" "\\n" | sed '/^$/d'
+ }
+
+(warning: this code was written ten years ago when I barely knew shell
+scripting and not touched since then; it has notable problems, trivially fixed,
+with directories with names starting with minus signs).
+
+}
+
+
+
+\sec{bugs}{BUGS}
+
+\car{
+   The resource file parsing code thinks that parentheses are special.
+   Also records are currently separated by commas.  Accordingly, apparix will
+   hitch if a path name contains a parenthesis or a comma.}
+
+\sec{author}{AUTHOR}
+\car{
+   Stijn van Dongen.}
+
+\sec{thanks}{THANKS}
+
+\par{
+   Stefan Kamphausen wrote \bf{cdargs}, the inspiration for apparix.}
+
+\par{
+   Sitaram Chamarty fixed up some of the existing bash code, and added the tab
+   completion part (basing this on similar code in cdargs).  He does not
+   garantuee predictable or even pretty results if there are spaces in the
+   directory names which you attempt to complete.  \secref{author} would like
+   to submit that spaces in path names are evil, and that the completion code
+   seems to work in their evil presence anyway. Just \iref{bugs}{don't put
+   commas} in path names.
+
+   }
+
+\par{
+   The autotooled build environment was modified from a template written
+   by Joost van Baal.
+
+   }
+
+
+\par{
+   Several people suggested to enable apparix to merge accessible directories
+   and marks, but Matias Piipari phrased it the most convincingly.
+
+   }
+
+
+\sec{history}{HISTORY}
+\par{
+   Apparix was created to optimize a scenario that
+   \aref{http://www.skamphausen.de/cgi-bin/ska/CDargs}{cdargs} does not support
+   very well, namely where the mark (called \it{needle} in cdargs) is always
+   known. As additional features apparix supports CDPATH-style behaviour,
+   derived subdirectory specification, and transparent treatment of bookmarks
+   and directories, all integrated with bash tab completion. In other respects
+   apparix is a much simpler application.  \bf{cdargs} offers menu-based
+   navigation of the file system and the bookmark list, which apparix does not.
+
+   }
+
+\end{pud::man}
+

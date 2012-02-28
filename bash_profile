@@ -1,2 +1,9 @@
-if [ -f ~/.bashrc ] ; then source ~/.bashrc ; fi
-if [[ -s ~/.rvm/scripts/rvm ]] ; then source ~/.rvm/scripts/rvm ; fi
+# 
+source ~/bash/settings
+source ~/bash/aliases
+source ~/bash/git-completion.bash
+source ~/bash/bash_apparix
+
+if [ -f "$BASH_COMPLETION_PATH" ]; then
+	. "$BASH_COMPLETION_PATH"
+fi
