@@ -155,6 +155,8 @@
 	# lg graph of just the latest commit
 	hd = !git --no-pager log --pretty=format:'%Cred%h%Creset - %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative -1
 	head = !git log -n1
+	tip = !git log --format=format:%h | head -1
+	tipl = !git log --format=format:%H | head -1
 
 	## Stashing
 	##--------
