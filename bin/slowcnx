@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [[ -z $1 ]]; then
-	sudo ipfw pipe 1 config bw 48Kbit/s delay 200ms
-	sudo ipfw add 1 pipe 1 src-port 80
-	sudo ipfw add 2 pipe 1 dst-port 80
-else
-	sudo ipfw flush
-fi
