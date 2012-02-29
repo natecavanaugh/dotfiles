@@ -216,7 +216,7 @@
 	m = !git co $(git getm)
 
 	# Get the current branch name
-	brn = "!f() { branch_name="$(git symbolic-ref HEAD 2>/dev/null)" || branch_name="(unnamed branch)"; branch_name=${branch_name##refs/heads/}; echo $branch_name; }; f"
+	brn = "!git branch $* | grep '^*' | sed 's/^* //'"
 
 	# Get the last mentioned JIRA ticket id from the commit log
 	get-latest-jira-id = "!f() { git log $1 --oneline | grep -Eo '([A-Z]{3,}-)([0-9]+)' -m 1; }; f"
