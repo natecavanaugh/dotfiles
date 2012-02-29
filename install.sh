@@ -59,13 +59,14 @@ function link_file {
 }
 
 for f in `ls -l | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.*_private|.*_build"`; do
-	# continue;
 	file="$f"
 	private_file="${file}_private"
 
 	if [[ -f "$DIR/$private_file" ]]; then
 		build_file="${f}_build"
-		cat "$file" "$private_file" > "$build_file"
+		cat "$file" > "$build_file"
+		echo >> "$build_file"
+		cat "$private_file" >> "$build_file"
 		file="$build_file"
 	fi
 
