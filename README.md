@@ -6,7 +6,7 @@ This repository inclues my dotfiles for unix enviroments
 
 To install, you can copy and paste this line into your terminal and press enter:
 
-	git clone https://github.com/natecavanaugh/dotfiles.git && ./dotfiles/install.sh
+	git clone https://github.com/natecavanaugh/dotfiles.git && cd dotfiles && ./install.sh
 
 Once that's done, you can type `source ~/.bash_profile` or just close and reopen the terminal window, and it will kick into effect.
 
