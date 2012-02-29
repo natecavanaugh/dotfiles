@@ -4,6 +4,13 @@
 [color]
 	ui = auto
 [alias]
+	# @Requires the following scripts (all available in this repo):
+	# git-get-latest-jira-id
+	# get-getm
+	# git-sync-origin
+	# git-of-interest
+	# git-pull-request
+
 	## Committing
 	##--------
 
