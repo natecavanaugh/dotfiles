@@ -14,6 +14,10 @@ export ANT_OPTS=-Xmx512m
 
 export GREP_OPTIONS="--exclude=\*.svn\*"
 
+[[ $UNAME == *CYGWIN* ]] && IS_CYGWIN=1
+
+export IS_CYGWIN=$IS_CYGWIN
+
 # Common paths
 
 export NC_TRUNK_PATH='/Volumes/Dev/Liferay'
@@ -144,9 +148,7 @@ function prompt () {
 	SUCCESS="✔"
 	ERROR="✖"
 
-	UNAME=$(uname)
-
-	if [[ $UNAME == *CYGWIN* ]]; then
+	if [[ $IS_CYGWIN ]]; then
 		SUCCESS=" √"
 		ERROR=" Χ"
 	fi

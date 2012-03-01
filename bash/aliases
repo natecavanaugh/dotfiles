@@ -119,9 +119,11 @@ function server () {
 
 # Personal
 
-alias ls='lsc --color'     #set the color settings on in the color ls program
-alias l='lsc --color -lg'
-alias ll='lsc --color -lag  | more'
+if [[ ! $IS_CYGWIN ]]; then
+	alias ls='lsc --color'     #set the color settings on in the color ls program
+	alias l='lsc --color -lg'
+	alias ll='lsc --color -lag  | more'
+fi
 
 # -- Paths
 
