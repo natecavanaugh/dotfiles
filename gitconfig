@@ -100,15 +100,15 @@
 	## Deleting
 	##--------
 
-	# Delete the current local branch and checkout master
-	cln = "!f() { local bn=$1; [[ -z $bn ]] && bn=$(git brn); master=$(git getm); [[ $bn == $master ]] && echo Cannot remove "$master" && exit; git co $master && git db $bn; }; f"
-
 	# Delete a local branch
 	db = branch -D
 	# Delete a remote branch
 	db-remote = !sh -c 'git push origin :$0'
 	# Delete both the local and remote branches
 	db-all = !sh -c 'git db $0 && git db-remote $0'
+
+	# Delete the current local branch and checkout master
+	dbc = "!f() { local bn=$1; [[ -z $bn ]] && bn=$(git brn); master=$(git getm); [[ $bn == $master ]] && echo Cannot remove "$master" && exit; git co $master && git db $bn; }; f"
 
 	## Pushing
 	##--------
@@ -221,6 +221,9 @@
 	# Checkout master
 	m = !git co $(git getm)
 
+	# Shortcut for help
+	h = help
+
 	# Get the current branch name
 	brn = "!git branch $* | grep '^*' | sed 's/^* //'"
 
@@ -250,3 +253,6 @@
 
 	# Reset last commit
 	pop = reset HEAD^
+
+	# Remove untracked files and directories
+	cln = clean -f -d
