@@ -210,6 +210,10 @@
 	prs = pull-request stat
 	# Submit pull request and close the current one
 	prcs = !git pr submit -q && git pr close
+	# Sets the update branch based on the current repo directory name (so liferay-portal-ee-6.1.x will have an update branch of ee-6.1.x)
+	set-pr-branch-config = "!f(){ git config "git-pull-request.$(git rev-parse --show-toplevel).$1" "$2"; }; f"
+	set-update-branch = "!f(){ git set-pr-branch-config "update-branch" "${1:-$(git getm)}"; }; f"
+	set-work-dir = "!f(){ git set-pr-branch-config "work-dir" "$1"; }; f"
 
 	## Misc
 	##--------
