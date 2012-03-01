@@ -146,9 +146,9 @@ function prompt () {
 
 	UNAME=$(uname)
 
-	if [[ UNAME == *CYGWIN* ]]; then
+	if [[ $UNAME == *CYGWIN* ]]; then
 		SUCCESS=" √"
-		SUCCESS=" Χ"
+		ERROR=" Χ"
 	fi
 
 	status_user="$NC_PROMPT_USER"
