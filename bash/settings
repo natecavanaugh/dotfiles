@@ -141,8 +141,18 @@ function prompt () {
 	export PROMPT_COMMAND=print_before_the_prompt
 
 	# Alter prompt
+	SUCCESS="✔"
+	ERROR="✖"
+
+	UNAME=$(uname)
+
+	if [[ UNAME == *CYGWIN* ]]; then
+		SUCCESS=" √"
+		SUCCESS=" Χ"
+	fi
+
 	status_user="$NC_PROMPT_USER"
-	status_before="\n\`if [ \$? = 0 ]; then echo -e '${txtgrn}✔${bldgrn}'; else echo -e '${txtred}✖${bldred}'; fi\` \@$txtrst"
+	status_before="\n\`if [ \$? = 0 ]; then echo -e '${txtgrn}$SUCCESS${bldgrn}'; else echo -e '${txtred}$ERROR${bldred}'; fi\` \@$txtrst"
 	status_message="$status_before $txtcyn$status_user$bldgrn\${NC_PROMPT_PWD} $bldblu\$(__git_ps1 '[%s]')$txtrst\n"
 	export PS1="$status_message -> "
 }
