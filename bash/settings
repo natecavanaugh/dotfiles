@@ -14,7 +14,9 @@ export ANT_OPTS=-Xmx512m
 
 export GREP_OPTIONS="--exclude=\*.svn\*"
 
-[[ $(uname) == *CYGWIN* ]] && IS_CYGWIN=1
+export $UNAME=$(uname)
+
+[[ $UNAME == *CYGWIN* ]] && IS_CYGWIN=1
 
 export IS_CYGWIN=$IS_CYGWIN
 
