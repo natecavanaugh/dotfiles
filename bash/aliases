@@ -8,6 +8,24 @@ alias mlog="tail -f /var/log/mail.log"
 alias pfs="sudo postfix start"
 
 # Utility
+
+function dotfilespath {
+	dirname $(resolve "$HOME/.bash_profile")
+}
+
+function resolve {
+	[ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); resolve "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|");
+}
+
+function reload {
+	dotfiles="$(dotfilespath)"
+	install_script="${dotfiles}/install.sh"
+
+	if [[ -d "$dotfiles" && -f "$install_script" ]]; then
+		$install_script
+	fi
+}
+
 alias sbp='source ~/.bash_profile'
 
 # Tar
@@ -63,6 +81,7 @@ function git_track() {
 }
 
 # Navigation
+
 function cdl {
 	cd $1;
 	ls -l
@@ -129,6 +148,8 @@ alias ls='$LS_COMMAND --color=tty'     #set the color settings on in the color l
 alias l='$LS_COMMAND --color=tty -lg'
 
 # -- Paths
+
+alias dotfiles='cd $(dirname $(resolve "$HOME/.bash_profile"))'
 
 # Volume paths
 alias vde='cd $NC_DEV_PATH;'
