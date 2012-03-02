@@ -1,6 +1,7 @@
 REPLACE_ALL=0
 KEEP_BACKUPS=0
 QUIET=0
+AUTO_RELOAD=1
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 function usage {
@@ -12,6 +13,7 @@ This script will install these dotfiles into your \$HOME directory
 OPTIONS:
    -h      Show this message
    -b      Backup file in the home before linking it
+   -m      Prevent auto reloading of the bash_profile after install
    -q      Disable output status messages
 EOF
 }
@@ -24,6 +26,9 @@ do
              ;;
          q)
              QUIET=1
+             ;;
+         m)
+             AUTO_RELOAD=0
              ;;
          h)
              usage
@@ -102,5 +107,13 @@ for f in `ls -l $DIR | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\
 	fi
 done
 
-status 'Installation successful. type "source ~/.bash_profile to kick things into gear (or just close and reopen this terminal window)".'
+if [[ "$AUTO_RELOAD" ]]; then
+	source "$HOME/.bash_profile"
+	install_details="Your dotfiles are now loaded and available."
+else
+	install_details='Type "source ~/.bash_profile to kick things into gear (or just close and reopen this terminal window)".'
+fi
+
+status "Installation successful. $install_details"
+
 exit 0;
