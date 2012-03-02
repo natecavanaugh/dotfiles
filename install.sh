@@ -58,12 +58,12 @@ function link_file {
 	status ""
 }
 
-for f in `ls -l | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.*_private|.*_build"`; do
-	file="$f"
+for f in `ls -l $DIR | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.*_private|.*_build"`; do
+	file="$DIR/$f"
 	private_file="${file}_private"
 
-	if [[ -f "$DIR/$private_file" ]]; then
-		build_file="${f}_build"
+	if [[ -f "$private_file" ]]; then
+		build_file="${file}_build"
 		cat "$file" > "$build_file"
 		echo >> "$build_file"
 		cat "$private_file" >> "$build_file"
@@ -72,13 +72,13 @@ for f in `ls -l | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.
 
 	file_name="$HOME/.$f"
 
-	if [[ -d "$f" ]]; then
+	if [[ -d "$file" ]]; then
 		file_name="$HOME/$f"
 	fi
 
 	if [[ -e "$file_name" || -L "$file_name" ]]; then
 		if [[ "$REPLACE_ALL" == 0 ]]; then
-			read -p "Replace $file_name? [(y)es, (n)o, (a)ll, (q)uit]: " replace
+			read -p "Replace '$file_name' with a link to '$file'? [(y)es, (n)o, (a)ll, (q)uit]: " replace
 
 			[[ "$replace" == "a" || "$replace" == "all" ]] && REPLACE_ALL=1
 
@@ -96,9 +96,9 @@ for f in `ls -l | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.
 			REPLACE=1
 		fi
 
-		[[ "$REPLACE" ]] && replace_file "$file_name" "$DIR/$file"
+		[[ "$REPLACE" ]] && replace_file "$file_name" "$file"
 	else
-		link_file "$file_name" "$DIR/$file"
+		link_file "$file_name" "$file"
 	fi
 done
 
