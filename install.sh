@@ -59,11 +59,11 @@ function replace_file {
 
 function link_file {
 	status "Linking $2 -> $1"
-	ln -s $2 $1
+	ln -s "$2" "$1"
 	status ""
 }
 
-for f in `ls -l $DIR | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.*_private|.*_build"`; do
+for f in `ls -l "$DIR" | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|install\.sh|.*_private|.*_build|misc"`; do
 	file="$DIR/$f"
 	private_file="${file}_private"
 
