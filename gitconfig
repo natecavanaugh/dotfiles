@@ -67,7 +67,7 @@
 	# Merge abort
 	mga = merge --abort
 	# Merge master into current branch
-	mm = merge $(git getm)
+	mm = !git merge $(git getm)
 
 	## Rebasing
 	##--------
@@ -144,14 +144,15 @@
 
 	# Pretty graph
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+	lgd = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cd) %C(cyan)<%an>%Creset' --abbrev-commit --date=default
 	# lg graph with the names of the files that have changed
 	lgst = !git lg --stat $@
 	# lg graph with the changes between the current branch and master
 	lgm = !git lg $(git getm)..
 	# lg graph with grepping on the log
-	lgg = "!f() { git lg --grep="$1"; }; f"
+	lgg = "!f() { git lg --grep=\"$1\"; }; f"
 	# lg graph with searching the changes
-	lgs = "!f() { git lg -S"$1"; }; f"
+	lgs = "!f() { git lg -S\"$1\"; }; f"
 	# lg graph of just the latest commit
 	hd = !git --no-pager log --pretty=format:'%Cred%h%Creset - %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative -1
 	head = !git log -n1
@@ -223,6 +224,9 @@
 
 	# Shortcut for help
 	h = help
+
+	# Cherry-pick
+	cp = cherry-pick
 
 	# Get the current branch name
 	brn = "!git branch $* | grep '^*' | sed 's/^* //'"

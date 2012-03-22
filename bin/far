@@ -40,5 +40,6 @@ done
 from="$1" ; shift
 to="$1" ; shift
 src=$(ack -l $ACKOPTS "$from" $@)
+echo $src
 
 perl -p -i -e "s/$from/$to/g" $src

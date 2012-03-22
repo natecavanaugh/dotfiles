@@ -36,9 +36,16 @@ alias tu="top -o cpu" # cpu
 alias tm="top -o vsize" # memory
 
 # Git
-alias g="git"
 alias gs="git status"
 alias gitk="/usr/bin/wish $(which gitk)"
+
+# Alias "g" to "git" command, but preserving git-completion
+alias g="git"
+complete -o default -o nospace -F _git g
+
+# Alias gh to git help
+alias gh="git help"
+complete -o default -o nospace -F _git_help gh
 
 # Open connection to Web timesheet
 function wts {
