@@ -43,6 +43,10 @@ function prompt () {
 
 		NC_PROMPT_USER=""
 
+		git_dir=`git rev-parse --show-toplevel 2>/dev/null || echo $PWD`
+		git_dir=`echo $git_dir | rev | cut -d"/" -f1-2 | rev`
+		echo -ne "\033]0;$git_dir\007"
+
 		NC_PROMPT_PWD="${PWD/#$HOME/~}"
 	}
 

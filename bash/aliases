@@ -47,24 +47,6 @@ complete -o default -o nospace -F _git g
 alias gh="git help"
 complete -o default -o nospace -F _git_help gh
 
-# Open connection to Web timesheet
-function wts {
-	ssh -f -N -L 9000:192.168.95.92:80 nathan.cavanaugh@vpn-2.liferay.com;
-	open http://localhost:9000/cgi/rt.dll
-	echo "SSH Connection to Web Timesheet is open."
-}
-
-# Close connection to Web timesheet
-function cwts { 
-	PID=$(ps ax | grep "ssh -f -N -L" | grep -v grep | awk '{ print $1 }')
-
-	if [[ -n $PID ]]; then
-		kill -9 $PID
-	fi
-
-	echo "SSH Connection to Web Timesheet is closed."
-}
-
 # MySQL
 function mysqlexec {
 	mysql -u root -p -e "$1";
