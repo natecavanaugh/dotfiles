@@ -1,6 +1,12 @@
 #!/bin/bash
 
-file_types=${2:-"*.js *.css *.jsp* *.vm *.ftl"}
+default_file_types="*.js *.css *.jsp* *.vm *.ftl"
+
+if [[ -n $NC_DEFAULT_OF_INTEREST_FILE_TYPES ]]; then
+	default_file_types=$NC_DEFAULT_OF_INTEREST_FILE_TYPES
+fi
+
+file_types=${2:-$default_file_types}
 
 ignore_folder="portal-web/test/"
 
@@ -27,4 +33,8 @@ else
 	echo "$entries"
 	echo "---"
 	echo "$totalstat"
+fi
+
+if [[ -n $3 && `command -v $3` ]]; then
+	$3 "$entries" "$ref_spec"
 fi

@@ -85,7 +85,7 @@
 	# Rebase on top of master
 	rbm = !git rebase $(git getm)
 	# Rebase on top of master interactively
-	rbim = rebase -i $(git getm)
+	rbim = !git rebase -i $(git getm)
 
 	## Resetting
 	##--------
@@ -120,7 +120,7 @@
 
 	pa = !git push-all
 	pam = !git push-allm
-	pum = push upstream $(git getm)
+	pum = !git push upstream $(git getm)
 	pbo = !git push origin $(git brn)
 
 	pu = pull upstream

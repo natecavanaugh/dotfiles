@@ -55,16 +55,20 @@ function prompt () {
 	# Alter prompt
 	SUCCESS="✔"
 	ERROR="✖"
+	#STARTER="❯"
+	#STARTER="➔ "
+	STARTER="⤷ "
 
 	if [[ $IS_CYGWIN ]]; then
 		SUCCESS=" √"
 		ERROR=" Χ"
+		STARTER="->"
 	fi
 
 	status_user="$NC_PROMPT_USER"
 	status_before="\n\`if [ \$? = 0 ]; then echo -e '${txtgrn}$SUCCESS${bldgrn}'; else echo -e '${txtred}$ERROR${bldred}'; fi\` \@$txtrst"
 	status_message="$status_before $txtcyn$status_user$bldgrn\${NC_PROMPT_PWD} $bldblu\$(__git_ps1 '[%s]')$txtrst\n"
-	export PS1="$status_message -> "
+	export PS1="$status_message $STARTER "
 }
 
 prompt

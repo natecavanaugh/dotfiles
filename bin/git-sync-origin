@@ -20,7 +20,7 @@ if [[ $updated == 1 ]]; then
 	echo "Updated from $old_head to $new_head ($old_head..$new_head)"
 	echo "---------------------------------------------------"
 
-	git of-interest $old_head..$new_head
+	git of-interest $old_head..$new_head "" $NC_OF_INTEREST_ENTRIES_CALLBACK
 
 	echo "---------------------------------------------------"
 	echo "Updated from $old_head to $new_head ($old_head..$new_head)"
