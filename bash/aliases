@@ -221,7 +221,11 @@ function showle {
 }
 
 function le2u {
-	perl -pi -e 's#\r\n#\n#' ${1:-*}
+    perl -pi -e 's#\r\n#\n#' ${1:-*}
+}
+
+function le2w {
+	perl -pi -e 's#\n#\r\n#' ${1:-*}
 }
 
 # Process finder
@@ -401,4 +405,19 @@ function jspfcss () {
 		filelist="$filelist '$f',";
 	done
 	echo $filelist
+}
+
+function compare () {
+    if [[ -f "$1" && -f "$2" ]]; then
+        file_1=$(md5 "$1" | awk '{ print $4 }')
+        file_2=$(md5 "$2" | awk '{ print $4 }')
+
+        if [[ $file_1 == $file_2 ]]; then
+            echo "Both files are equal ($file_1)"
+        else
+            echo "$1 ($file_1) is different from $2 ($file_2)"
+        fi
+    else
+        echo "One or both of these is not a file"
+    fi
 }
