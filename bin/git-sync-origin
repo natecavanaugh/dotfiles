@@ -1,16 +1,63 @@
 #!/bin/bash
+usage()
+{
+cat << EOF
+usage: $0 options
 
-old_head=$(git rev-parse --short head | tr -d '\n')
+This script will sync the specified branch by pulling from upstream and pushing to your origin
+
+OPTIONS:
+	-h	Show this message
+	-c	Checkout the specified branch, sync, and go back to the current branch
+EOF
+}
+
+CHECKOUT=0
+
+while getopts ":hcu:" OPTION
+do
+	 case $OPTION in
+		 h)
+			usage
+			exit 1
+			;;
+		 c)
+			CHECKOUT=1
+			;;
+		 ?)
+			usage
+			exit
+			;;
+	 esac
+done
+shift $(($OPTIND - 1))
+
+current_branch=$(git brn)
+update_branch=${1:-$current_branch}
+
+if [[ $current_branch == $update_branch ]]; then
+	CHECKOUT=0
+fi
 
 msg=$(git stash save)
 
 [[ $msg =~ ^'No local changes to save'$ ]] && stashed=0 || stashed=1
 
-git fetch upstream && git merge upstream/$1 --ff-only && git push origin $1
+if [[ $CHECKOUT == 1 ]]; then
+	git checkout $update_branch
+fi
+
+old_head=$(git rev-parse --short head | tr -d '\n')
+
+git fetch upstream && git merge upstream/$update_branch --ff-only && git push origin $update_branch
 
 new_head=$(git rev-parse --short head | tr -d '\n')
 
 [ $old_head != $new_head ] && updated=1 || updated=0
+
+if [[ $CHECKOUT == 1 ]]; then
+	git checkout $current_branch
+fi
 
 if [[ $stashed == 1 ]]; then
 	git stash pop > /dev/null
