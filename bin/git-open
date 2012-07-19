@@ -17,10 +17,11 @@ EOF
 }
 
 OPEN_ALL=0
+VERBOSE=0
 EXTENSIONS=""
 ONLY_EXTENSIONS=""
 
-while getopts ":hax:o:" OPTION
+while getopts ":hax:o:v" OPTION
 do
      case $OPTION in
          h)
@@ -35,6 +36,9 @@ do
              ;;
          o)
              ONLY_EXTENSIONS=$OPTARG
+             ;;
+         v)
+             VERBOSE=$OPTARG
              ;;
          ?)
              usage
@@ -76,6 +80,9 @@ if [[ -n $ONLY_EXTENSIONS ]]; then
 	only_re="\.$ONLY_EXTENSIONS\$"
 fi
 
+open_files=0
+total_files=$(echo "$files" | wc -l | awk {'print $1'})
+
 if [[ -n $useopen ]]; then
 	for i in $files; do
 		is_binary=0;
@@ -97,13 +104,19 @@ if [[ -n $useopen ]]; then
 			open_message="Excluding $i because of the file type";
 		fi
 
-		echo $open_message;
+		if [[ $VERBOSE == 1 ]]; then
+			echo $open_message;
+		fi
 
 		# if [[ (! "$i" =~ $re) && (-z $only_re || "$i" =~ $only_re) && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
 		if [[ $exclude == 0 && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
 			$useopen -a "$editor" "$i";
+
+			(( open_files++ ))
 		fi
 	done
+
+echo "Opened $open_files file(s) out of $total_files"
 
 elif [[ -n $usecygwin ]]; then
 	for i in "$files"; do
