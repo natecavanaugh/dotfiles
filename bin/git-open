@@ -1,0 +1,116 @@
+#!/bin/bash
+# Argument = -m test -r server -p password -v
+
+usage()
+{
+cat << EOF
+usage: $0 options
+
+This script will open the files in the specified commit range
+
+OPTIONS:
+   -h      Show this message
+   -a      open all files (including binary)
+   -o      Only open file extensions (pipe delimited)
+   -x      Exclude file extensions (pipe delimited)
+EOF
+}
+
+OPEN_ALL=0
+EXTENSIONS=""
+ONLY_EXTENSIONS=""
+
+while getopts ":hax:o:" OPTION
+do
+     case $OPTION in
+         h)
+             usage
+             exit 1
+             ;;
+         a)
+             OPEN_ALL=1
+             ;;
+         x)
+             EXTENSIONS=$OPTARG
+             ;;
+         o)
+             ONLY_EXTENSIONS=$OPTARG
+             ;;
+         ?)
+             usage
+             exit
+             ;;
+     esac
+done
+shift $(($OPTIND - 1))
+
+ref_spec=$(git get-custom-refspec $1);
+
+editor=`git config --get user.editor`;
+
+if [[ -z "$editor" ]]; then
+	echo 'Please set the user.editor setting in your git config';
+	echo 'e.g. by running: git config --global user.editor "/path/to/Applications/Sublime Text 2.app"';
+	exit 1
+fi
+
+if [[ ! -e "$editor" ]]; then
+	echo "Please set user.editor to a valid application.";
+	echo "It is currently set to $editor";
+	exit 1;
+fi
+
+files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB $ref_spec`;
+
+useopen=`command -v open`;
+usecygwin=`command -v cygstart`;
+
+SAVEIFS=$IFS;
+IFS=$'\n';
+
+if [[ -n $EXTENSIONS ]]; then
+	re="\.$EXTENSIONS\$"
+fi
+
+if [[ -n $ONLY_EXTENSIONS ]]; then
+	only_re="\.$ONLY_EXTENSIONS\$"
+fi
+
+if [[ -n $useopen ]]; then
+	for i in $files; do
+		is_binary=0;
+
+		if [[ -z "`file "$i"|grep text`" ]]; then
+			is_binary=1;
+		fi
+
+		open_message="Trying to open $i";
+
+		if [[ $is_binary == 1 && $OPEN_ALL == 0 ]]; then
+			open_message="Ignoring $i because its binary";
+		fi
+
+		exclude=0
+
+		if [[ (-n $re && ("$i" =~ $re)) || (-n $only_re && (! "$i" =~ $only_re)) ]]; then
+			exclude=1
+			open_message="Excluding $i because of the file type";
+		fi
+
+		echo $open_message;
+
+		# if [[ (! "$i" =~ $re) && (-z $only_re || "$i" =~ $only_re) && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
+		if [[ $exclude == 0 && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
+			$useopen -a "$editor" "$i";
+		fi
+	done
+
+elif [[ -n $usecygwin ]]; then
+	for i in "$files"; do
+		echo opening $i;
+
+		$usecygwin $editor $i;
+	done
+fi
+
+IFS=$SAVEIFS;
