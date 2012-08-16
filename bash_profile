@@ -1,4 +1,4 @@
-# 
+#
 source ~/bash/git-completion.bash
 source ~/bash/prompt
 source ~/bash/settings

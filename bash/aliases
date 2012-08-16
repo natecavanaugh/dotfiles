@@ -45,6 +45,9 @@ alias g="git"
 complete -o default -o nospace -F _git g
 
 # Alias gh to git help
+alias gu="cd $(git rev-parse --show-toplevel)"
+
+# Alias gh to git help
 alias gh="git help"
 
 function mygithelp {
@@ -206,7 +209,7 @@ function _complete_up {
         # !! Escaping is performed automatially by virtue of defining the compspec with '-o filenames' (passed to 'complete').
         [[ -n "$matchingPath" ]] && COMPREPLY=("$matchingPath")
 
-    fi  
+    fi
 }
 
 #Assign the auto-completion function _get for our command get.

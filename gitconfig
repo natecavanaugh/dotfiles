@@ -54,7 +54,7 @@
 	# create a branch by name, or if it exists, checkout the branch
 	cb = "!f() { git checkout -b $1 2> /dev/null && echo Created new branch $1 || `git checkout $1`; }; f"
 	# "Refreshes" the current branch (deletes the local and remote, and recreates it)
-	refresh = "!f() { git co $(git getm) && git db-all $1; git cb $1; }; f"
+	refresh = "!f() { brn="${1:-$(git brn)}"; git co $(git getm) && git db-all $brn; git cb $brn; }; f"
 	# Move all commits after the passed one to a new branch
 	# eg. git split 5c29ab4 custom-feature
 	split = "!f() { git checkout -b $2 && msg=$(git stash save) && git checkout - && git reset --hard $1 && git checkout $2 && [[ ! $msg =~ ^'No local changes to save'$ ]] && git stash pop; }; f"
@@ -198,9 +198,9 @@
 	##--------
 
 	# Update submodules
-	subu = submodule update
+	subu = "!f() { cd $(git rev-parse --show-toplevel) && git submodule update; }; f"
 	# Update submodules and initialize them
-	subi = submodule update --init
+	subi = "!f() { cd $(git rev-parse --show-toplevel) && git submodule update --init; }; f"
 
 	## Submitting Pull Requests
 	##--------

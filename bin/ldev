@@ -1,15 +1,68 @@
 #!/bin/sh
 
-cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
+# cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
 
-if [[ -z $1 ]]; then
-	ant="all"
+dir_path="$1"
+cmd="$2"
+
+if [[ $dir_path != *"."* && $dir_path != *"/"* ]]; then
+	cmd="$dir_path"
+	dir_path=""
+fi
+
+if [[ -z $dir_path ]]; then
+	dir_path="$NC_TRUNK_PORTAL_PATH"
 else
-	ant=$1
+	tmp_dir_path="$(git rev-parse --show-toplevel 2>/dev/null)"
+
+	if [[ -n "$tmp_dir_path" ]]; then
+		dir_path="$tmp_dir_path"
+	fi
 fi
 
-ant $ant
-
-if [[ $? = 0 ]]; then
-	liferay dev
+if [[ -z "$cmd" ]]; then
+	cmd="all"
 fi
+
+
+if [[ -d "$dir_path" ]]; then
+	cd $dir_path
+	ant $cmd
+
+	if [[ $? = 0 ]]; then
+		# liferay dev
+
+		if [[ -f "$dir_path/../startup.sh" ]]; then
+			$dir_path/../startup.sh
+		else
+			user_props="app.server.$USER.properties"
+			tomcat_path=""
+
+			if [[ -d "../tomcat" ]]; then
+				tomcat_path="../tomcat"
+			elif [[ -f "$user_props" ]]; then
+				tomcat_path=$(sed -n "s/^app\.server\.tomcat\.dir=\(.*\)/\1/ p" "$user_props")
+			fi
+
+			if [[ -n "$tomcat_path" && -d "$tomcat_path" ]]; then
+				$tomcat_path/bin/catalina.sh run
+			else
+				echo "Could not find an app server to start"
+			fi
+		fi
+	fi
+else
+	echo "$dir_path is not a directory"
+fi
+
+# if [[ -z $1 ]]; then
+# 	ant="all"
+# else
+# 	ant=$1
+# fi
+
+# ant $ant
+
+# if [[ $? = 0 ]]; then
+# 	liferay dev
+# fi

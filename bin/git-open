@@ -11,17 +11,20 @@ This script will open the files in the specified commit range
 OPTIONS:
    -h      Show this message
    -a      open all files (including binary)
+   -l      just return a list of the files to be open (useful for piping to other commands)
    -o      Only open file extensions (pipe delimited)
+   -v      Verbose mode, basically prints a message for every file
    -x      Exclude file extensions (pipe delimited)
 EOF
 }
 
 OPEN_ALL=0
 VERBOSE=0
+LIST=0
 EXTENSIONS=""
 ONLY_EXTENSIONS=""
 
-while getopts ":hax:o:v" OPTION
+while getopts ":halo:vx:" OPTION
 do
      case $OPTION in
          h)
@@ -31,14 +34,17 @@ do
          a)
              OPEN_ALL=1
              ;;
-         x)
-             EXTENSIONS=$OPTARG
+         l)
+             LIST=1
              ;;
          o)
              ONLY_EXTENSIONS=$OPTARG
              ;;
          v)
              VERBOSE=$OPTARG
+             ;;
+         x)
+             EXTENSIONS=$OPTARG
              ;;
          ?)
              usage
@@ -83,37 +89,53 @@ fi
 open_files=0
 total_files=$(echo "$files" | wc -l | awk {'print $1'})
 
+if [[ $OPEN_ALL == 0 ]]; then
+	if [[ -n $EXTENSIONS ]]; then
+		# echo "\.$EXTENSIONS$"
+		files=$(echo "$files" | grep -E -v "\.$EXTENSIONS$")
+	elif [[ -n $ONLY_EXTENSIONS ]]; then
+		files=$(echo "$files" | grep -E "\.$ONLY_EXTENSIONS$")
+	fi	
+fi
+
+if [[ $LIST == 1 ]]; then
+	echo "$files"
+	exit
+fi
+
 if [[ -n $useopen ]]; then
 	for i in $files; do
 		is_binary=0;
 
-		if [[ -z "`file "$i"|grep text`" ]]; then
-			is_binary=1;
-		fi
-
 		open_message="Trying to open $i";
 
-		if [[ $is_binary == 1 && $OPEN_ALL == 0 ]]; then
-			open_message="Ignoring $i because its binary";
+		if [[ $OPEN_ALL == 0 ]]; then
+			if [[ -z "`file "$i"|grep text`" ]]; then
+				is_binary=1;
+			fi
+
+			if [[ $is_binary == 1 ]]; then
+				open_message="Ignoring $i because its binary";
+			fi
+		fi
+		# exclude=0
+
+		if [[ -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
+			$useopen -a "$editor" "$i";
+
+			(( open_files++ ))
 		fi
 
-		exclude=0
-
-		if [[ (-n $re && ("$i" =~ $re)) || (-n $only_re && (! "$i" =~ $only_re)) ]]; then
-			exclude=1
-			open_message="Excluding $i because of the file type";
-		fi
+		# if [[ (-n $re && ("$i" =~ $re)) || (-n $only_re && (! "$i" =~ $only_re)) ]]; then
+		# 	exclude=1
+		# 	open_message="Excluding $i because of the file type";
+		# fi
 
 		if [[ $VERBOSE == 1 ]]; then
 			echo $open_message;
 		fi
 
 		# if [[ (! "$i" =~ $re) && (-z $only_re || "$i" =~ $only_re) && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
-		if [[ $exclude == 0 && -f "$i" && ($OPEN_ALL == 1 || $is_binary == 0) ]]; then
-			$useopen -a "$editor" "$i";
-
-			(( open_files++ ))
-		fi
 	done
 
 echo "Opened $open_files file(s) out of $total_files"
