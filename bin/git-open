@@ -78,24 +78,22 @@ usecygwin=`command -v cygstart`;
 SAVEIFS=$IFS;
 IFS=$'\n';
 
-if [[ -n $EXTENSIONS ]]; then
-	re="\.$EXTENSIONS\$"
-fi
-
-if [[ -n $ONLY_EXTENSIONS ]]; then
-	only_re="\.$ONLY_EXTENSIONS\$"
-fi
-
 open_files=0
 total_files=$(echo "$files" | wc -l | awk {'print $1'})
 
 if [[ $OPEN_ALL == 0 ]]; then
+	PREFIX_RE=".*"
+	PREFIX_STANDARD="\."
+
 	if [[ -n $EXTENSIONS ]]; then
-		# echo "\.$EXTENSIONS$"
-		files=$(echo "$files" | grep -E -v "\.$EXTENSIONS$")
+		[[ $EXTENSIONS == *.* ]]  && PREFIX="$PREFIX_RE" || PREFIX="$PREFIX_STANDARD"
+
+		files=$(echo "$files" | grep -E -v "${PREFIX}(${EXTENSIONS})$")
 	elif [[ -n $ONLY_EXTENSIONS ]]; then
-		files=$(echo "$files" | grep -E "\.$ONLY_EXTENSIONS$")
-	fi	
+		[[ $ONLY_EXTENSIONS == *.* ]]  && PREFIX="$PREFIX_RE" || PREFIX="$PREFIX_STANDARD"
+
+		files=$(echo "$files" | grep -E "${PREFIX}(${ONLY_EXTENSIONS})$")
+	fi
 fi
 
 if [[ $LIST == 1 ]]; then
