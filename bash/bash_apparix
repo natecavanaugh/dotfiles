@@ -122,7 +122,7 @@ function to () {
   fi
 }
 
-# function to add a bookmark
+# add a bookmark
 function bm () {
   if test "$2"; then
     apparix --add-mark "$1" "$2";
@@ -133,7 +133,7 @@ function bm () {
   fi
 }
 
-# function to enlists a directory as a portal and adds all subdirectories as bookmarks. 
+# adds a directory as a "portal" and adds all subdirectories as bookmarks.
 function portal () {
   if test "$1"; then
     apparix --add-portal "$1";
@@ -142,16 +142,16 @@ function portal () {
   fi
 }
 
-#function to delete a bookmark
+# delete a bookmark
 function delete() {
   if test "$1"; then
     apparix -purge-mark "$1";
   else
     apparix -purge-mark;
-  fi  
+  fi
 }
 
-# function to generate list of completions from .apparixrc
+# generate a list of completions from .apparixrc
 function _apparix_aliases ()
 { cur=$2
   dir=$3
