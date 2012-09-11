@@ -54,7 +54,7 @@
 	# create a branch by name, or if it exists, checkout the branch
 	cb = "!f() { git checkout -b $1 2> /dev/null && echo Created new branch $1 || `git checkout $1`; }; f"
 	# "Refreshes" the current branch (deletes the local and remote, and recreates it)
-	refresh = "!f() { git co $(git getm) && git db-all $1; git cb $1; }; f"
+	refresh = "!f() { brn="${1:-$(git brn)}"; git co $(git getm) && git db-all $brn; git cb $brn; }; f"
 	# Move all commits after the passed one to a new branch
 	# eg. git split 5c29ab4 custom-feature
 	split = "!f() { git checkout -b $2 && msg=$(git stash save) && git checkout - && git reset --hard $1 && git checkout $2 && [[ ! $msg =~ ^'No local changes to save'$ ]] && git stash pop; }; f"
@@ -131,8 +131,8 @@
 
 	# Sync master from upstream to origin
 	# This alias will stash current changes, switch to master, sync, then switch back to the original branch and apply the stash
-	som = "!f() { local current_branch=$(git brn); local saved_index=0; local stash_save_result=`git stash save`; [[ $stash_save_result == *\"HEAD is now at\"* ]] && saved_index=1; master=$(git getm); git checkout $master && git sync-origin $master && git checkout $current_branch && ([[ $saved_index == 1 ]]) && git stash pop; }; f;"
-	# Sync current branch with changes from upstream/master to the current branch on origin
+	som = !git sync-origin -c $(git getm)
+	# Try to sync current branch with changes from upstream/master to the current branch on origin (tries to use a fast-forward merge)
 	so = !git sync-origin $(git getm)
 	# Sync current branch from upstream to origin
 	sbo = !git sync-origin $(git brn)
@@ -190,17 +190,17 @@
 	# open batch of files
 	bopen = "!f() { local ref_spec=$(git get-custom-refspec $1); editor=`git config --get user.editor`;files=`git diff --pretty=format: --name-only $ref_spec`;useopen=`command -v open`; usecygwin=`command -v cygstart`; [[ -n $useopen ]] && open -a \"$editor\" $files && exit $?; [[ -n $usecygwin ]] && editor=$(cygpath -d $editor); for i in $files; do echo opening $i; $usecygwin $editor $i; done }; f"
 	# open each file individually
-	open = "!f() { local ref_spec=$(git get-custom-refspec $1); editor=`git config --get user.editor`;files=`git diff --pretty=format: --name-only $ref_spec`;useopen=`command -v open`; usecygwin=`command -v cygstart`; [[ -n $useopen ]] && for i in $files; do echo opening $i; $useopen -a \"$editor\" $i; done && exit $?; [[ -n $usecygwin ]] && editor=$(cygpath -d $editor); for i in $files; do echo opening $i; $usecygwin $editor $i; done }; f"
+	# open = "!f() { all_flag="\\ -a"; local open_all=0; [[ $@ =~ $all_flag ]] && open_all=1; local ref_spec=$(git get-custom-refspec $1); editor=`git config --get user.editor`;files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB $ref_spec`;useopen=`command -v open`; usecygwin=`command -v cygstart`; SAVEIFS=$IFS; IFS=\"\n\"; [[ -n $useopen ]] && for i in "$files"; do is_binary=0; [[ -n "`file "$i"|grep text`" ]] && is_binary=1; open_message=\"Trying to open $i\"; [[ $is_binary == 1 && $open_all == 0 ]] && open_message=\"Ignoring $i because its binary\"; echo $open_message;[[ -f "$i" && ($open_all == 1 || $is_binary == 1) ]] && { $useopen -a \"$editor\" "$i"; } done && exit $?; [[ -n $usecygwin ]] && editor=$(cygpath -d $editor); for i in $files; do echo opening $i; $usecygwin $editor $i; done; IFS=$SAVEIFS;}; f"
 	# Open all files that are different from master
-	openm = !git open $(git getm)..
+	openm = !git open $@ $(git getm)..
 
 	## Submodules
 	##--------
 
 	# Update submodules
-	subu = submodule update
+	subu = "!f() { cd $(git rev-parse --show-toplevel) && git submodule update; }; f"
 	# Update submodules and initialize them
-	subi = submodule update --init
+	subi = "!f() { cd $(git rev-parse --show-toplevel) && git submodule update --init; }; f"
 
 	## Submitting Pull Requests
 	##--------
@@ -209,8 +209,12 @@
 	pr = pull-request
 	# Show pull requests w/stats
 	prs = pull-request stat
+	# Show all pulls across repos w/ details
+	prid = pull-request info-detailed
 	# Submit pull request and close the current one
 	prcs = !git pr submit -q && git pr close
+	# Update the meta data for the pull-request, done after a rebase to track changes correctly
+	prum = pull-request update-meta
 	# Sets the update branch based on the current repo directory name (so liferay-portal-ee-6.1.x will have an update branch of ee-6.1.x)
 	set-pr-branch-config = "!f(){ git config "git-pull-request.$(git rev-parse --show-toplevel).$1" "$2"; }; f"
 	set-update-branch = "!f(){ git set-pr-branch-config "update-branch" "${1:-$(git getm)}"; }; f"
@@ -260,3 +264,6 @@
 
 	# Remove untracked files and directories
 	cln = clean -f -d
+
+	[include]
+		path = .gitconfig_user

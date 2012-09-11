@@ -51,6 +51,12 @@ if [[ -n $1 ]]; then
         # base_liferay_path="${NC_BRANCHES_PATH}/6.1.x"
         # echo "should be set to ${NC_BRANCHES_PATH}/6.1.x" soon
         base_liferay_path="${NC_EE61_PORTAL_PATH}"
+    elif [[ $1 == "15c" ]]; then
+        # Should be uncommented soon
+        # base_liferay_path="${NC_BRANCHES_PATH}/6.1.x"
+        # echo "should be set to ${NC_BRANCHES_PATH}/6.1.x" soon
+        base_aui_path="NC_ALLOY_15"
+        base_liferay_path="${NC_TRUNK_61_PORTAL_PATH}"
     fi
 fi
 
