@@ -254,7 +254,7 @@ function pfkj {
 # Simpler grep
 # @argument (optional) path
 function gr {
-	grep -R "$1" "${2:-.}"
+	grep -R "$1" "${2:-.}" --exclude-dir="\.git"
 	# echo $1 ${2:.}
 }
 
@@ -304,8 +304,8 @@ alias l5p='cd $NC_BRANCHES_PATH/5.2.x/portal;'
 
 # Alloy paths
 alias aui='cd $NC_ALLOY_PATH;'
-alias aui1='cd $NC_ALLOY_EE1_PATH;'
-alias aui15='cd $NC_ALLOY_EE15_PATH;'
+alias aui1='cd $NC_ALLOY_1_PATH;'
+alias aui15='cd $NC_ALLOY_15_PATH;'
 
 alias myg='cd $NC_GIT_HOME;'
 
@@ -424,5 +424,14 @@ function compare () {
         fi
     else
         echo "One or both of these is not a file"
+    fi
+}
+
+function pw () {
+    top_level=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [[ -n "$top_level" && -d "$top_level/portal-web" ]]; then
+        cd "$top_level/portal-web"
+    else
+        echo "Nowhere to go..."
     fi
 }
