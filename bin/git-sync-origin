@@ -41,7 +41,7 @@ fi
 
 msg=$(git stash save)
 
-[[ $msg =~ ^'No local changes to save'$ ]] && stashed=0 || stashed=1
+[[ $msg == 'No local changes to save' ]] && stashed=0 || stashed=1
 
 if [[ $CHECKOUT == 1 ]]; then
 	git checkout $update_branch
