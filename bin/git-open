@@ -70,7 +70,7 @@ if [[ ! -e "$editor" ]]; then
 	exit 1;
 fi
 
-files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB $ref_spec`;
+files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB --relative $ref_spec`;
 
 useopen=`command -v open`;
 usecygwin=`command -v cygstart`;
