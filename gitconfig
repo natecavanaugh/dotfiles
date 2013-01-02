@@ -179,6 +179,7 @@
 
 	# List the filenames and diff stats for a commit/treeish
 	dl = "!f() { ref_spec=$(git get-custom-refspec $1); git diff --stat $ref_spec; }; f"
+	dlm = "!f() { git diff --stat $(git getm)..; }; f"
 	# Show the patch for a commit/treeish
 	delta = "!f() { ref_spec=$(git get-custom-refspec $1); git diff $ref_spec; }; f"
 	# Show *just* the file names that have been changed for a commit/treeish
@@ -236,7 +237,7 @@
 	brn = "!git branch $* | grep '^*' | sed 's/^* //'"
 
 	# Get the last mentioned JIRA ticket id from the commit log
-	get-latest-jira-id = "!f() { git log $1 --oneline | grep -Eo '([A-Z]{3,}-)([0-9]+)' -m 1; }; f"
+	get-latest-jira-id = "!f() { git log $1 --oneline | grep -Eo '([A-Z]{3,}-)([0-9]+)' -m 1 | head -n 1; }; f"
 
 	# Open the url to the latest JIRA ticket referenced in the log
 	jira = "!f() { ticketId=$(git get-latest-jira-id $2); open http://issues.liferay.com/browse/$ticketId;  }; f"
@@ -267,3 +268,16 @@
 
 	[include]
 		path = .gitconfig_user
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[diff]
+	tool = Kaleidoscope
+[difftool]
+	prompt = false
+[mergetool]
+	prompt = false
+[merge]
+	tool = Kaleidoscope
