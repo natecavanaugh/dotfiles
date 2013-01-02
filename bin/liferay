@@ -18,7 +18,7 @@
 
 # cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
 
-dir_path="$1"
+dir_path="${1:-.}"
 cmd="$2"
 
 if [[ $dir_path != *"."* && $dir_path != *"/"* ]]; then
