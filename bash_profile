@@ -1,9 +1,9 @@
 #
-source ~/bash/git-completion.bash
-source ~/bash/prompt
-source ~/bash/settings
-source ~/bash/aliases
-source ~/bash/bash_apparix
+source ~/.bash/git-completion.bash
+source ~/.bash/prompt
+source ~/.bash/settings
+source ~/.bash/aliases
+source ~/.bash/bash_apparix
 
 if [ -f "$HOME/.bash_profile.$USER" ]; then
 	. "$HOME/.bash_profile.$USER"

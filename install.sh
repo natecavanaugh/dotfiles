@@ -77,9 +77,9 @@ for f in `ls -l "$DIR" | awk 'NR!=1 {print $NF}' | grep -v -E "README\.md|instal
 
 	file_name="$HOME/.$f"
 
-	if [[ -d "$file" ]]; then
-		file_name="$HOME/$f"
-	fi
+	# if [[ -d "$file" ]]; then
+	# 	file_name="$HOME/$f"
+	# fi
 
 	if [[ -e "$file_name" || -L "$file_name" ]]; then
 		if [[ "$REPLACE_ALL" == 0 ]]; then
