@@ -267,7 +267,7 @@ function server () {
 
 LS_COMMAND="ls"
 
-if [[ `command -v lsc` ]]; then
+if [[ $UNAME == "Darwin" && `command -v lsc` ]]; then
 	LS_COMMAND="lsc"
 fi
 
