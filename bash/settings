@@ -64,7 +64,7 @@ export NC_ALLOY_EE15_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-ee-1.5.x"
 
 export NC_GIT_HOME="${NC_DEV_WORK_PATH}/git/natecavanaugh"
 
-export NC_BIN_PATH="${HOME}/bin"
+export NC_BIN_PATH="${HOME}/.bin"
 
 export NODE_PATH="/usr/local/lib/node_modules"
 
@@ -93,7 +93,7 @@ export XUGGLE_HOME=/usr/local/xuggler
 export PATH=$XUGGLE_HOME/bin:$PATH
 export DYLD_LIBRARY_PATH=$XUGGLE_HOME/lib:$DYLD_LIBRARY_PATH
 
-export PATH=/usr/local/bin:/usr/local/mysql/bin:/Users/ncavanaugh/Data/eg-mainline:${NC_SHELL_PATH}:$HOME/bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH
+export PATH=/usr/local/bin:/usr/local/mysql/bin:/Users/ncavanaugh/Data/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH
 ICONIC_PATH='/Users/ncavanaugh/Dev/Work/git/natecavanaugh/iconic-uni.font'
 
 export PATH=$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin

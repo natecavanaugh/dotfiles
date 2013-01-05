@@ -265,10 +265,10 @@ function server () {
 
 # Personal
 
-LS_COMMAND="lsc"
+LS_COMMAND="ls"
 
-if [[ $IS_CYGWIN ]]; then
-	LS_COMMAND="ls"
+if [[ `command -v lsc` ]]; then
+	LS_COMMAND="lsc"
 fi
 
 alias ls='$LS_COMMAND --color=tty'     #set the color settings on in the color ls program
