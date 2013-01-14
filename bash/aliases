@@ -13,10 +13,6 @@ function dotfilespath {
 	dirname $(resolve "$HOME/.bash_profile")
 }
 
-function resolve {
-	[ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); resolve "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|");
-}
-
 function reload {
 	dotfiles="$(dotfilespath)"
 	install_script="${dotfiles}/install.sh"
@@ -278,20 +274,8 @@ alias l='$LS_COMMAND --color=tty -lg'
 
 alias dotfiles='cd $(dirname $(resolve "$HOME/.bash_profile"))'
 
-# Volume paths
-alias vde='cd $NC_DEV_PATH;'
-alias vda='cd $NC_DATA_PATH;'
-
 # Liferay paths
-alias ,ld='cd $NC_TRUNK_DEV_PATH;'
-alias lde=,ld
-alias ,lp='cd ${NC_TRUNK_PORTAL_PATH};'
-alias ,lpw='cd ${NC_TRUNK_PORTAL_PATH}/portal-web;'
-alias ,lpi='cd ${NC_TRUNK_PORTAL_PATH}/portal-impl;'
-alias ,lph='cd ${NC_TRUNK_PW_HTML_PATH};'
-alias ,lpt='cd ${NC_TRUNK_PW_HTML_PATH}/themes;'
-alias ,lpj='cd ${NC_TRUNK_PW_HTML_PATH}/js/liferay;'
-alias ,lpc='cd ${NC_TRUNK_PW_HTML_PATH}/portal/css;'
+alias lde='cd $NC_TRUNK_DEV_PATH;'
 
 alias l60='cd $NC_BRANCHES_PATH/6.0.x;'
 alias l60p='cd $NC_BRANCHES_PATH/6.0.x/portal;'
@@ -299,21 +283,12 @@ alias l60p='cd $NC_BRANCHES_PATH/6.0.x/portal;'
 alias l61='cd $NC_BRANCHES_PATH/6.1.x;'
 alias l61p='cd $NC_BRANCHES_PATH/6.1.x/portal;'
 
-alias l52='cd $NC_BRANCHES_PATH/5.2.x;'
-alias l5p='cd $NC_BRANCHES_PATH/5.2.x/portal;'
-
 # Alloy paths
 alias aui='cd $NC_ALLOY_PATH;'
 alias aui1='cd $NC_ALLOY_1_PATH;'
 alias aui15='cd $NC_ALLOY_15_PATH;'
 
 alias myg='cd $NC_GIT_HOME;'
-
-alias auibuild='cd ${NC_ALLOY_PATH}/build'
-alias auidemos='cd ${NC_ALLOY_PATH}/demos'
-alias auisrc='cd ${NC_ALLOY_PATH}/src'
-
-alias cbin='cd $NC_BIN_PATH'
 
 # -- Commands
 
@@ -342,11 +317,14 @@ alias fn='find . -name '
 # Shortcut to SublimeText 2 cli
 alias so='~/Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl'
 
-# Replace Sublime icon
-alias subicon='sudo cp ~/Documents/Sublime\ Text\ 2.icns  ~/Applications/Sublime\ Text\ 2.app/Contents/Resources/'
-
-
 # Functions
+
+# Resolves a symlink to determine where it points to
+# @argument path to symlink
+
+function resolve {
+    [ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); resolve "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|");
+}
 
 # Extract Git commit ID from generated alloy zip
 # @argument path to zip
@@ -367,40 +345,13 @@ function az {
 	fi
 
 	unzip -z $name;
-	
+
 	[[ $delfile == 1 ]] && rm $name;
 }
 
 function auis_impl {
 	cd $1;
 	git log -1 --format="%h" | tr -d '\n'
-}
-
-function auis () {
-	auis_impl ${NC_ALLOY_PATH}
-}
-
-function auisee () {
-	auis_impl ${NC_ALLOY_EE1_PATH}
-}
-
-function auic () {
-	sha=$(auis)
-	echo $sha | tr -d '\n' | pbcopy && echo "Copied $sha to clipboard."
-}
-
-function auicee () {
-	sha=$(auisee)
-	echo $sha | tr -d '\n' | pbcopy && echo "Copied $sha to clipboard."
-}
-
-# Get Last JIRA ID from the 
-function jid {
-	git log -1 --oneline | grep -Eo "([A-Z]{3,}-)([0-9]+)"
-}
-
-function mjid {
-	echo "`jid` - ${1:-Source formatting}"
 }
 
 function jspfcss () {
@@ -411,6 +362,13 @@ function jspfcss () {
 	done
 	echo $filelist
 }
+
+# Do a checksum comparison of two files to verify if
+# two files are 100% equal. Useful for testing if
+# one file has some invisible character or imperceptible
+# difference.
+# @argument first file
+# @argument second file
 
 function compare () {
     if [[ -f "$1" && -f "$2" ]]; then
@@ -427,6 +385,8 @@ function compare () {
     fi
 }
 
+# Navigate to the portal-web directory of any Liferay repo
+
 function pw () {
     top_level=$(git rev-parse --show-toplevel 2>/dev/null)
     if [[ -n "$top_level" && -d "$top_level/portal-web" ]]; then
@@ -434,4 +394,25 @@ function pw () {
     else
         echo "Nowhere to go..."
     fi
+}
+
+# Generate a background-image formatted data URI from an image
+# and add it to the clipboard.
+# @argument path to image
+
+if [[ `command -v base64` ]]; then
+    function base64img () {
+        str=$(base64 $1 | tr -d '\r\n')
+
+        echo -n "url(data:text/plain;charset=utf-8;base64,$str)" | pbcopy
+    }
+fi
+
+# Check any website to see if it is running on Liferay
+# as well as what version it is.
+# This assumes they haven't disabled the Liferay-Portal header
+# @argument url
+
+function lfrv () {
+    curl -ILs $1 | grep "Liferay"
 }

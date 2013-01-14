@@ -35,8 +35,6 @@ function prompt () {
 	txtrst='\e[0m'    # Text Reset
 
 	function print_before_the_prompt {
-		
-
 		local max_pwd_length=10
 		local small_pwd_length=10
 		local joiner="…"

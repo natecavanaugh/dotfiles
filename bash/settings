@@ -4,8 +4,6 @@ export EDITOR="subl -w";
 
 export SMARTGIT_MAX_HEAP_SIZE=2048m
 
-export RHINO_HOME=/Users/ncavanaugh/Dev/Experimental/rhino1_7r2
-
 export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
 
 export ANT_OPTS="-Xms512m -Xmx1024m -XX:MaxPermSize=512m"
@@ -20,17 +18,23 @@ export IS_CYGWIN=$IS_CYGWIN
 
 # Common paths
 
-export NC_TRUNK_PATH='/Users/ncavanaugh/Dev/Liferay'
+export NC_DEV_PATH="$HOME/Dev"
 
-export NC_TRUNK_DEV_PATH='/Users/ncavanaugh/Dev/Liferay/Trunk'
+export NC_DEV_WORK_PATH="${NC_DEV_PATH}/Work"
+
+export NC_DATA_PATH="$HOME/Data"
+
+export NC_LIFERAY_PATH="$NC_DEV_PATH/Liferay"
+
+export NC_TRUNK_DEV_PATH="$NC_LIFERAY_PATH/Trunk"
+
+export NC_EE_PATH="$NC_LIFERAY_PATH/EE"
 
 export NC_TRUNK_PORTAL_PATH="${NC_TRUNK_DEV_PATH}/liferay-portal"
 
 export NC_TRUNK_61_PORTAL_PATH="${NC_TRUNK_DEV_PATH}/liferay-portal-6.1.x"
 
 export NC_TRUNK_PW_HTML_PATH="${NC_TRUNK_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_EE_PATH='/Users/ncavanaugh/Dev/Liferay/EE'
 
 export NC_EE_PORTAL_PATH="${NC_EE_PATH}/liferay-portal-ee"
 
@@ -43,12 +47,6 @@ export NC_EE_PW_HTML_PATH="${NC_EE_PORTAL_PATH}/portal-web/docroot/html"
 export NC_EE60_PW_HTML_PATH="${NC_EE60_PORTAL_PATH}/portal-web/docroot/html"
 
 export NC_EE61_PW_HTML_PATH="${NC_EE61_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_DEV_PATH='/Users/ncavanaugh/Dev'
-
-export NC_DEV_WORK_PATH="${NC_DEV_PATH}/Work"
-
-export NC_DATA_PATH='/Users/ncavanaugh/Data'
 
 export NC_BRANCHES_PATH="${NC_DEV_PATH}/Liferay/Branches"
 
@@ -91,12 +89,12 @@ export GIT_PS1_SHOWUPSTREAM="verbose"
 
 export XUGGLE_HOME=/usr/local/xuggler
 export PATH=$XUGGLE_HOME/bin:$PATH
-export DYLD_LIBRARY_PATH=$XUGGLE_HOME/lib:$DYLD_LIBRARY_PATH
+export RHINO_HOME=$NC_DEV_PATH/Experimental/rhino1_7r2
 
-export PATH=/usr/local/bin:/usr/local/mysql/bin:/Users/ncavanaugh/Data/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH
-ICONIC_PATH='/Users/ncavanaugh/Dev/Work/git/natecavanaugh/iconic-uni.font'
+ICONIC_PATH="$NC_DEV_WORK_PATH/git/natecavanaugh/iconic-uni.font"
 
-export PATH=$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin
+export PATH=/usr/local/bin:/usr/local/mysql/bin:$NC_DATA_PATH/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin
+
 if [[ -d $HOME/bin_private ]]; then
 	export PATH=$HOME/bin_private:$PATH
 fi
@@ -105,4 +103,6 @@ fi
 # Config settings
 
 # better tab complete
+# Automatically cycles through completions
+# instead of just displaying them
 bind 'TAB:menu-complete'
