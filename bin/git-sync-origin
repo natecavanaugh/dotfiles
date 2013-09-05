@@ -64,11 +64,18 @@ if [[ $stashed == 1 ]]; then
 fi
 
 if [[ $updated == 1 ]]; then
-	echo "Updated from $old_head to $new_head ($old_head..$new_head)"
+	total=$(git rev-list $old_head..$new_head --count)
+	total_commits="$total commits"
+
+	if [[ "$total" -eq "1" ]]; then
+		total_commits="$total commit"
+	fi
+
+	echo "Updated with $total_commits from $old_head to $new_head ($old_head..$new_head)"
 	echo "---------------------------------------------------"
 
 	git of-interest $old_head..$new_head "" $NC_OF_INTEREST_ENTRIES_CALLBACK
 
 	echo "---------------------------------------------------"
-	echo "Updated from $old_head to $new_head ($old_head..$new_head)"
+	echo "Updated with $total_commits from $old_head to $new_head ($old_head..$new_head)"
 fi
