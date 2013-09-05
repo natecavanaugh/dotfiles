@@ -1,6 +1,9 @@
 [core]
 	quotepath = false
 	autocrlf = input
+	excludesfile = ~/.gitignore
+[init]
+	templatedir = ~/.git_template
 [color]
 	ui = auto
 [alias]
@@ -24,6 +27,7 @@
 	ciam = commit --amend -m
 	# Add changed files and then commit w/message
 	cam = commit -a -m
+	# cam = "!f() { msg=\"$1\"; [[ -z $msg ]] && msg=\"$(req)\"; git commit -a -m \"$msg\"; }; f"
 	# Commit and add files
 	ca = commit -a
 	# These are the same as cam, ca and squish, except it adds new files as well
@@ -116,7 +120,7 @@
 	# Syncs from upstream, then pushes the master branch to origin and upstream
 	push-allm = "!master=$(git getm); git sync-origin $master && git push origin $master && git push upstream $master;"
 	# Syncs from upstream, then pushes the master branch to origin and upstream
-	push-all = "!f() { current_branch=$(git brn); git sync-origin $current_branch && git push origin $current_branch && git push upstream $current_branch; }; f"
+	push-all = "!f() { current_branch=$(git brn); git sync-origin $current_branch && git push origin $current_branch $@ && git push upstream $current_branch $@; }; f"
 
 	pa = !git push-all
 	pam = !git push-allm
@@ -137,7 +141,9 @@
 	# Sync current branch from upstream to origin
 	sbo = !git sync-origin $(git brn)
 	# Update current branch from origin
-	ubo = !git pull origin $(git brn)
+	ubo = !git pull --rebase origin $(git brn)
+	# Update current branch from upstream
+	ubu = !git pull --rebase upstream $(git brn)
 
 	## Logging
 	##--------
@@ -155,6 +161,7 @@
 	lgs = "!f() { git lg -S\"$1\"; }; f"
 	# lg graph of just the latest commit
 	hd = !git --no-pager log --pretty=format:'%Cred%h%Creset - %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative -1
+	hdd = !git lgd -1
 	head = !git log -n1
 	tip = !git log --format=format:%h | head -1
 	tipl = !git log --format=format:%H | head -1
@@ -170,6 +177,13 @@
 	ss = !git add . && git stash save
 	# List all entries in the stash
 	sl = stash list
+	# List all entries in the stash with the --stat option
+	# (I really hate having to do it this way. Currently, passing the --stat option to stash list will give way too many files)
+	sls = "!f() { limit=\"$1\"; [[ -z \"$limit\" ]] && limit=$(git log --format=\"%gd\" -g refs/stash | wc -l) && let limit-=1; for (( c=0; c<=$limit; c++ )); do echo \"stash@{$c}\"; git stash show stash@{$c}; echo \"---\"; done }; f"
+	# Show stash
+	sh = "!f() { local stash_rev=stash@{${1:-0}}; git stash show $stash_rev;  }; f"
+	# Show stash patch
+	shp = "!f() { local stash_rev=stash@{${1:-0}}; git stash show -p $stash_rev;  }; f"
 
 	## Diffing
 	##--------
@@ -216,6 +230,12 @@
 	prcs = !git pr submit -q && git pr close
 	# Update the meta data for the pull-request, done after a rebase to track changes correctly
 	prum = pull-request update-meta
+	# Transitions JIRA
+	prtj = pull-request transition-jira
+	# Rejects a pull
+	# eg. git prcj joe.bloggs
+	prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; git pr close \"$comment\" && git pr transition-jira $ticket \"Requires Additional Work\" \"$user\"; }; f"
+	# prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; [[ -n \"$comment\" ]] && echo 'has comment'; echo \"user = $user, comment = $comment, ticket = $ticket\"; }; f"
 	# Sets the update branch based on the current repo directory name (so liferay-portal-ee-6.1.x will have an update branch of ee-6.1.x)
 	set-pr-branch-config = "!f(){ git config "git-pull-request.$(git rev-parse --show-toplevel).$1" "$2"; }; f"
 	set-update-branch = "!f(){ git set-pr-branch-config "update-branch" "${1:-$(git getm)}"; }; f"
@@ -249,7 +269,7 @@
 	#     git get-custom-refspec ^					# prints HEAD^..
 	#     git get-custom-refspec 81c35e1			# prints 81c35e1^..81c35e1
 	#     git get-custom-refspec 5250022..master	# prints 5250022..master
-	get-custom-refspec = "!f() { to_rev=${1:-HEAD}; [[ $to_rev == ^ ]] && to_rev=HEAD^..; old_head=${to_rev}^; new_head=$to_rev; if [[ $to_rev == *..* ]]; then old_head=${to_rev%%..*}; new_head=${to_rev#*..*}; fi; ref_spec=$old_head..$new_head; echo $ref_spec; }; f"
+	get-custom-refspec = "!f() { to_rev=${1:-HEAD}; [[ $to_rev == ^ ]] && to_rev=HEAD^..; old_head=${to_rev}^; new_head=$to_rev; if [[ $to_rev == *..* ]]; then old_head=${to_rev%%..*}; new_head=${to_rev#*..*}; fi; ref_spec=$old_head...$new_head; echo $ref_spec; }; f"
 
 	# Rank contributors by number of commits
 	stats = shortlog -s -n
@@ -268,6 +288,9 @@
 
 	[include]
 		path = .gitconfig_user
+
+[difftool "SmartSynchronize"]
+	cmd = smartsync \"$LOCAL\" \"$REMOTE\"
 [difftool "Kaleidoscope"]
 	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
 [mergetool "Kaleidoscope"]
@@ -281,3 +304,9 @@
 	prompt = false
 [merge]
 	tool = Kaleidoscope
+[difftool "sourcetree"]
+	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
