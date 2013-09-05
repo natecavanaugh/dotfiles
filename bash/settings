@@ -56,6 +56,10 @@ export NC_ALLOY_1_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-1.0.x"
 
 export NC_ALLOY_15_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-1.5.x"
 
+export NC_ALLOY_2_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-2.0.x"
+
+export NC_ALLOY_2D_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-2.0.x-deprecated"
+
 export NC_ALLOY_EE1_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-ee-1.0.x"
 
 export NC_ALLOY_EE15_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-ee-1.5.x"
@@ -82,9 +86,9 @@ export LS_COLORS='di=96:fi=0:ln=95:pi=5:so=5:bd=5:cd=5:or=31:mi=0:ex=31'
 # Git autocompletition
 # Show branch dirty state in git autocompletion script
 export GIT_PS1_SHOWDIRTYSTATE="true";
-# Show untracked files in git autocompletion script
-export GIT_PS1_SHOWUNTRACKEDFILES="true";
-# Show upstream state
+# # Show untracked files in git autocompletion script
+# export GIT_PS1_SHOWUNTRACKEDFILES="true";
+# # Show upstream state
 export GIT_PS1_SHOWUPSTREAM="verbose"
 
 export XUGGLE_HOME=/usr/local/xuggler
@@ -93,7 +97,7 @@ export RHINO_HOME=$NC_DEV_PATH/Experimental/rhino1_7r2
 
 ICONIC_PATH="$NC_DEV_WORK_PATH/git/natecavanaugh/iconic-uni.font"
 
-export PATH=/usr/local/bin:/usr/local/mysql/bin:$NC_DATA_PATH/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin
+export PATH=/usr/local/bin:/usr/local/mysql/bin:$NC_DATA_PATH/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin:/usr/local/share/npm/bin
 
 if [[ -d $HOME/bin_private ]]; then
 	export PATH=$HOME/bin_private:$PATH

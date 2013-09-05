@@ -24,6 +24,13 @@ function reload {
 
 alias sbp='source ~/.bash_profile'
 
+# Share history between terminal sessions
+# export history
+alias he="history -a"
+
+# import history
+alias hi="history -n"
+
 # Tar
 alias tx="tar -xvzf"
 alias tb="tar -cvjf"
@@ -250,7 +257,7 @@ function pfkj {
 # Simpler grep
 # @argument (optional) path
 function gr {
-	grep -R "$1" "${2:-.}" --exclude-dir="\.git"
+	grep -R "$1" "${2:-.}" --exclude-dir="\.git" --color=auto
 	# echo $1 ${2:.}
 }
 
@@ -283,10 +290,12 @@ alias l60p='cd $NC_BRANCHES_PATH/6.0.x/portal;'
 alias l61='cd $NC_BRANCHES_PATH/6.1.x;'
 alias l61p='cd $NC_BRANCHES_PATH/6.1.x/portal;'
 
-# Alloy paths
+# Alloy paths & misc
 alias aui='cd $NC_ALLOY_PATH;'
 alias aui1='cd $NC_ALLOY_1_PATH;'
 alias aui15='cd $NC_ALLOY_15_PATH;'
+alias aui2='cd $NC_ALLOY_2_PATH;'
+alias aui2d='cd $NC_ALLOY_2D_PATH;'
 
 alias myg='cd $NC_GIT_HOME;'
 
@@ -296,7 +305,6 @@ alias myg='cd $NC_GIT_HOME;'
 alias aa='ant all'
 alias ad='ant deploy'
 alias acd='ant clean deploy'
-alias abt='ant build-themes'
 alias abm='ant build-modules'
 alias abs='ant build-skins'
 alias abm='ant build-modules'
@@ -305,8 +313,11 @@ alias aba='touch -c third-party/alloy-1.0.1.zip && abaf'
 
 # Misc
 
+# Github pull from user
+alias gp='github-pull'
+
 # Search history
-alias hs="history|grep"
+alias hs="history | grep --color=auto"
 
 # QuickLook file
 alias qlf='qlmanage -p "$@" >& /dev/null'
@@ -396,6 +407,32 @@ function pw () {
     fi
 }
 
+# Navigate to the portal-impl directory of any Liferay repo
+
+function pi () {
+    top_level=$(git rev-parse --show-toplevel 2>/dev/null)
+    if [[ -n "$top_level" && -d "$top_level/portal-impl" ]]; then
+        cd "$top_level/portal-impl"
+    else
+        echo "Nowhere to go..."
+    fi
+}
+
+# Navigate to the portal-web directory and run ant build-themes
+
+function abt {
+    start_dir="$PWD"
+
+    pw && ant build-themes
+
+    echo "$start_dir"
+    echo "$PWD"
+
+    if [[ "$PWD" != "$start_dir" ]]; then
+        cd "$start_dir";
+    fi
+}
+
 # Generate a background-image formatted data URI from an image
 # and add it to the clipboard.
 # @argument path to image
@@ -414,5 +451,9 @@ fi
 # @argument url
 
 function lfrv () {
-    curl -ILs $1 | grep "Liferay"
+    curl -ILs $1 | grep --color=auto "Liferay"
 }
+
+# Quick way to rebuild the Launch Services database and get rid
+# of duplicates in the Open With submenu.
+alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
