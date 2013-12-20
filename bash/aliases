@@ -118,7 +118,7 @@ function up {
     [[ "$1" == '-h' || "$1" == '--help' ]] && { echo -e "usage:\n\t$FUNCNAME [n]\n\t$FUNCNAME dirname\n  Moves up N levels in the path to the current working directory, 1 by default.\n  If DIRNAME is given, it must be the full name of an ancestral directory (case does not matter).\n  If there are multiple matches, the one *lowest* in the hierarchy is changed to." && return 0; }
 
     if [[ -n "$1" ]]; then
-        if [[ $1 =~ ^[0-9]+$ ]]; then   # A number, specifying the number of levels to go up.            
+        if [[ $1 =~ ^[0-9]+$ ]]; then   # A number, specifying the number of levels to go up.
             local strpath=$( printf "%${1}s" ) # This creates a string with as many spaces as levels were specified.
             dir=${strpath// /$dir}  # Create the go-up-multiple-levels cd expression by replacing each space with '../'
         elif [[ $1 =~ ^/ ]]; then  # Already an absolute path? Use as is. (Typically, this happens as a result of command-line completion invoked via _complete_up().)
@@ -167,20 +167,20 @@ function _complete_up {
 
         # Create a go-up-multiple-levels cd expression that corresponds to the number of levels specified.
         local strpath=$( printf "%${curToken%%/*}s" ) # This creates a string with as many spaces as levels were specified.
-        local upDirSpec=${strpath// /../}  # Create the go-up-multiple-levels cd expression by replacing each space with '../'        
+        local upDirSpec=${strpath// /../}  # Create the go-up-multiple-levels cd expression by replacing each space with '../'
 
         # Expand to absolute path (ending in '/' to facilitate optional further completion) and return.
         local dir=$(cd "$upDirSpec"; echo -n "$PWD/")
         if [[ "$dir" == '//' ]]; then dir='/'; fi # In case the target dir turns out to be the root dir, we've accidentally created '//' in the previous statement; fix it.
         # !! Note that the path will appear *unquoted* on the command line and must therefore be properly \-escaped (e.g., a ' '  as '\ ').
         # !! Escaping is performed automatially by virtue of defining the compspec with '-o filenames' (passed to 'complete').
-        COMPREPLY=("$dir") 
+        COMPREPLY=("$dir")
 
     else # Token is a name -> look for a prefix match among all the ancestral path components; use the first match found (i.e., the next match up in the hierarchy).
 
         # Determine if we should do case-insensitive matching or not, depending on whether cases-insensitive completion was turned on globally via ~/.inputrc or /etc/inputrc.
         # We do this to be consistent with the default command completion behavior.
-        local caseInsensitive=0        
+        local caseInsensitive=0
         bind -v | egrep -i '\bcompletion-ignore-case[[:space:]]+on\b' &>/dev/null && caseInsensitive=1
 
         # If we need to do case-INsensitive matching in this function, we need to make sure the 'nocasematch' shell option is (temporarily) turned on.
@@ -234,6 +234,14 @@ function le2u {
 
 function le2w {
 	perl -pi -e 's#\n#\r\n#' "${1:-*}"
+}
+
+# details
+# Shows either the file name, alias info, or function definition
+# for a given executable.
+# @argument name of function, alias, or script to list the details for
+function details {
+    alias "$1" || type -f "$1" || declare -f "$1" || which "$1"
 }
 
 # Process finder
@@ -326,7 +334,7 @@ alias qlf='qlmanage -p "$@" >& /dev/null'
 alias fn='find . -name '
 
 # Shortcut to SublimeText 2 cli
-alias so='~/Applications/Sublime\ Text\ 2.app/Contents/SharedSupport/bin/subl'
+alias so='~/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # Functions
 
@@ -368,7 +376,7 @@ function auis_impl {
 function jspfcss () {
 	cd "${NC_TRUNK_PW_HTML_PATH}/portal/css";
 	filelist=''
-	for f in `ls -R | grep -E '.jspf'`; do 
+	for f in `ls -R | grep -E '.jspf'`; do
 		filelist="$filelist '$f',";
 	done
 	echo $filelist
@@ -425,8 +433,17 @@ function abt {
 
     pw && ant build-themes
 
-    echo "$start_dir"
-    echo "$PWD"
+    if [[ "$PWD" != "$start_dir" ]]; then
+        cd "$start_dir";
+    fi
+}
+
+# Navigate to the portal-impl directory and run ant format-source
+
+function afs {
+    start_dir="$PWD"
+
+    pi && ant format-source
 
     if [[ "$PWD" != "$start_dir" ]]; then
         cd "$start_dir";
