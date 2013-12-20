@@ -40,7 +40,16 @@ if [[ -d "$dir_path" ]]; then
 	cd $dir_path
 
 	if [[ -n "$cmd" ]]; then
+		if [[ "$cmd" == deploy* ]]; then
+			cd ./portal-impl
+			# cmd="deploy-properties"
+		fi
+
 		ant $cmd
+
+		if [[ "$PWD" != "$dir_path" ]]; then
+			cd $dir_path
+		fi
 	fi
 
 	if [[ $? = 0 ]]; then
@@ -58,7 +67,28 @@ if [[ -d "$dir_path" ]]; then
 				tomcat_path=$(sed -n "s/^app\.server\.tomcat\.dir=\(.*\)/\1/ p" "$user_props")
 			fi
 
+			source_xuggler_jar="$dir_path/../xuggle-xuggler-arch-x86_64-xuggle-darwin11.jar"
+			dest_xuggler_jar="$dir_path/portal-web/docroot/WEB-INF/lib/xuggle-xuggler-arch-x86_64-xuggle-darwin11.jar"
+
+			if [[ -f "$source_xuggler_jar" ]]; then
+				if [[ ! -f "$dest_xuggler_jar" ]]; then
+					cp "$source_xuggler_jar" "$dest_xuggler_jar"
+				fi
+			fi
+
+			source_xuggler_noarch_jar="$dir_path/../xuggle-xuggler-noarch.jar"
+			dest_xuggler_noarch_jar="$dir_path/portal-web/docroot/WEB-INF/lib/xuggle-xuggler-noarch.jar"
+
+			if [[ -f "$source_xuggler_noarch_jar" ]]; then
+				if [[ ! -f "$dest_xuggler_noarch_jar" ]]; then
+					cp "$source_xuggler_noarch_jar" "$dest_xuggler_noarch_jar"
+				fi
+			fi
+
 			if [[ -n "$tomcat_path" && -d "$tomcat_path" ]]; then
+				# port=$(perl -ne '/<Connector port="([^"]+)" protocol="(org\.apache\.coyote\.http11\.Http11NioProtocol|HTTP\/1\.1)"/ && print "$1" and exit;' "$tomcat_path/conf/server.xml")
+				# echo "-- $port ---"
+				# (sleep 30; $(open -g "http://localhost:${port:-8080}"))&
 				$tomcat_path/bin/catalina.sh run
 			else
 				echo "Could not find an app server to start"
