@@ -221,19 +221,19 @@ function _complete_up {
 complete -o filenames -F _complete_up up
 
 function le {
-	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' ${1:-*}
+	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' "${1:-*}"
 }
 
 function showle {
-	perl -p -e 's[\r\n][\\r\\n\n]; s[(?<!WIN)\n][\\n\n]; s[\r][\\r\n];' ${1:-*}
+	perl -p -e 's[\r\n][\\r\\n\n]; s[(?<!WIN)\n][\\n\n]; s[\r][\\r\n];' "${1:-*}"
 }
 
 function le2u {
-    perl -pi -e 's#\r\n#\n#' ${1:-*}
+    perl -pi -e 's#\r\n#\n#' "${1:-*}"
 }
 
 function le2w {
-	perl -pi -e 's#\n#\r\n#' ${1:-*}
+	perl -pi -e 's#\n#\r\n#' "${1:-*}"
 }
 
 # Process finder
