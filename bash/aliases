@@ -241,7 +241,7 @@ function le2w {
 # for a given executable.
 # @argument name of function, alias, or script to list the details for
 function details {
-    alias "$1" || type -f "$1" || declare -f "$1" || which "$1"
+    alias "$1" || type -a "$1" || declare -f "$1" || which "$1"
 }
 
 # Process finder
@@ -300,6 +300,7 @@ alias l61p='cd $NC_BRANCHES_PATH/6.1.x/portal;'
 
 # Alloy paths & misc
 alias aui='cd $NC_ALLOY_PATH;'
+alias auid='cd $NC_ALLOY_DEPRECATED_PATH;'
 alias aui1='cd $NC_ALLOY_1_PATH;'
 alias aui15='cd $NC_ALLOY_15_PATH;'
 alias aui2='cd $NC_ALLOY_2_PATH;'
