@@ -18,8 +18,15 @@
 
 # cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
 
+
+function notify {
+	echo $1
+	[[ `command -v terminal-notifier` ]] && terminal-notifier -message "$1"
+}
+
 dir_path="${1:-.}"
 cmd="$2"
+status=0
 
 if [[ $dir_path != *"."* && $dir_path != *"/"* ]]; then
 	cmd="$dir_path"
@@ -40,19 +47,20 @@ if [[ -d "$dir_path" ]]; then
 	cd $dir_path
 
 	if [[ -n "$cmd" ]]; then
-		if [[ "$cmd" == deploy* ]]; then
+		if [[ "$cmd" == deploy* || "$cmd" == compile* ]]; then
 			cd ./portal-impl
 			# cmd="deploy-properties"
 		fi
 
 		ant $cmd
+		status=$?
 
 		if [[ "$PWD" != "$dir_path" ]]; then
 			cd $dir_path
 		fi
 	fi
 
-	if [[ $? = 0 ]]; then
+	if [ $status = 0 ]; then
 		# liferay dev
 
 		if [[ -f "$dir_path/../startup.sh" ]]; then
@@ -91,10 +99,12 @@ if [[ -d "$dir_path" ]]; then
 				# (sleep 30; $(open -g "http://localhost:${port:-8080}"))&
 				$tomcat_path/bin/catalina.sh run
 			else
-				echo "Could not find an app server to start"
+				notify "Could not find an app server to start"
 			fi
 		fi
+	else
+		notify "Build failed"
 	fi
 else
-	echo "$dir_path is not a directory"
+	notify "$dir_path is not a directory"
 fi
