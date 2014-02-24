@@ -9,10 +9,12 @@ This script will sync the specified branch by pulling from upstream and pushing 
 OPTIONS:
 	-h	Show this message
 	-c	Checkout the specified branch, sync, and go back to the current branch
+	-u	Specify the remote we should pull changes from
 EOF
 }
 
 CHECKOUT=0
+UPSTREAM="upstream"
 
 while getopts ":hcu:" OPTION
 do
@@ -23,6 +25,9 @@ do
 			;;
 		 c)
 			CHECKOUT=1
+			;;
+		 u)
+			UPSTREAM="$OPTARG"
 			;;
 		 ?)
 			usage
@@ -49,7 +54,7 @@ fi
 
 old_head=$(git rev-parse --short head | tr -d '\n')
 
-git fetch upstream && git merge upstream/$update_branch --ff-only && git push origin $update_branch
+git fetch "$UPSTREAM" && git merge "$UPSTREAM"/$update_branch --ff-only && git push origin $update_branch
 
 new_head=$(git rev-parse --short head | tr -d '\n')
 
