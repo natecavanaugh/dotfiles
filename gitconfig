@@ -41,7 +41,7 @@
 
 	# camm and cimm, acts as cam and cim aliases
 	# but automatically creates a message using the last JIRA ticket it can find (if any)
-	# can take one optional parameter which is the message to use after the 
+	# can take one optional parameter which is the message to use after the
 	# ticket ID (by default, this is "Source formatting")
 	camm = "!f() { ticketId=$(git get-latest-jira-id $2); git commit -a -m \"$ticketId - ${1:-Source formatting}\"; }; f"
 	cimm = "!f() { ticketId=$(git get-latest-jira-id $2); git commit -m \"$ticketId - ${1:-Source formatting}\"; }; f"
@@ -207,7 +207,7 @@
 	# open each file individually
 	# open = "!f() { all_flag="\\ -a"; local open_all=0; [[ $@ =~ $all_flag ]] && open_all=1; local ref_spec=$(git get-custom-refspec $1); editor=`git config --get user.editor`;files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB $ref_spec`;useopen=`command -v open`; usecygwin=`command -v cygstart`; SAVEIFS=$IFS; IFS=\"\n\"; [[ -n $useopen ]] && for i in "$files"; do is_binary=0; [[ -n "`file "$i"|grep text`" ]] && is_binary=1; open_message=\"Trying to open $i\"; [[ $is_binary == 1 && $open_all == 0 ]] && open_message=\"Ignoring $i because its binary\"; echo $open_message;[[ -f "$i" && ($open_all == 1 || $is_binary == 1) ]] && { $useopen -a \"$editor\" "$i"; } done && exit $?; [[ -n $usecygwin ]] && editor=$(cygpath -d $editor); for i in $files; do echo opening $i; $usecygwin $editor $i; done; IFS=$SAVEIFS;}; f"
 	# Open all files that are different from master
-	openm = !git open $@ $(git getm)..
+	openm = "!f() { git open \"$@\" $(git getm)..; }; f"
 
 	## Submodules
 	##--------
@@ -306,7 +306,9 @@
 	tool = Kaleidoscope
 [difftool "sourcetree"]
 	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustExitCode = true
+[push]
+	default = simple
