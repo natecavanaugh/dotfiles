@@ -192,8 +192,9 @@
 	dtc = difftool --cached
 
 	# List the filenames and diff stats for a commit/treeish
-	dl = "!f() { ref_spec=$(git get-custom-refspec $1); git diff --stat $ref_spec; }; f"
-	dlm = "!f() { git diff --stat $(git getm)..; }; f"
+	dl = "!f() { ref_spec=$(git get-custom-refspec $1); git get-diffstats $ref_spec; }; f"
+	dlm = "!f() { git get-diffstats -f $(git getm)..; }; f"
+	dlmr = "!f() { git get-diffstats -f -r $(git getm)..; }; f"
 	# Show the patch for a commit/treeish
 	delta = "!f() { ref_spec=$(git get-custom-refspec $1); git diff $ref_spec; }; f"
 	# Show *just* the file names that have been changed for a commit/treeish
