@@ -241,7 +241,23 @@ function le2w {
 # for a given executable.
 # @argument name of function, alias, or script to list the details for
 function details {
-    alias "$1" || type -a "$1" || declare -f "$1" || which "$1"
+	if [[ `command -v "$1"` ]]; then
+		cmd_type="$(type -t $1)"
+
+		if [[ $cmd_type == "alias" ]]; then
+			alias "$1" 2> /dev/null
+		elif [[ $cmd_type == "file" ]]; then
+			which "$1" 2> /dev/null
+		elif [[ $cmd_type == "function" ]]; then
+			declare -f "$1" 2> /dev/null
+		else
+			type -a "$1" 2> /dev/null
+		fi
+	else
+		echo "$1 doesn't seem to exist"
+	fi
+
+	return 1
 }
 
 # Process finder
