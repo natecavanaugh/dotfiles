@@ -191,6 +191,8 @@
 	dt = difftool
 	dtc = difftool --cached
 
+	diffm = !git diff $(git getm)..
+
 	# List the filenames and diff stats for a commit/treeish
 	dl = "!f() { ref_spec=$(git get-custom-refspec $1); git get-diffstats $ref_spec; }; f"
 	dlm = "!f() { git get-diffstats -f $(git getm)..; }; f"
@@ -235,7 +237,9 @@
 	prtj = pull-request transition-jira
 	# Rejects a pull
 	# eg. git prcj joe.bloggs
-	prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; git pr close \"$comment\" && git pr transition-jira $ticket \"Requires Additional Work\" \"$user\"; }; f"
+	prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; if ! [[ $# -ge 2 ]]; then comment=\"$user\"; user=\"\"; read -p \"It doesn't appear that you've passed a user. Who do you want to reassign it to? [Liferay or Github username]: \" user; fi; git pr close \"$comment\" && git pr transition-jira $ticket \"Requires Additional Work\" \"$user\"; }; f"
+	#\"$user\" =~ ^[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+$ || \"$user\" =~ ^[a-zA-Z0-9-_]+$
+	#
 	# prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; [[ -n \"$comment\" ]] && echo 'has comment'; echo \"user = $user, comment = $comment, ticket = $ticket\"; }; f"
 	# Sets the update branch based on the current repo directory name (so liferay-portal-ee-6.1.x will have an update branch of ee-6.1.x)
 	set-pr-branch-config = "!f(){ git config "git-pull-request.$(git rev-parse --show-toplevel).$1" "$2"; }; f"
@@ -294,6 +298,8 @@
 	cmd = smartsync \"$LOCAL\" \"$REMOTE\"
 [difftool "Kaleidoscope"]
 	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool "K1"]
+	cmd = tmp_test \"$MERGED\" \"$LOCAL\" \"$REMOTE\"
 [mergetool "Kaleidoscope"]
 	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustExitCode = true

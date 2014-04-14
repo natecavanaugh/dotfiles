@@ -10,7 +10,7 @@ match_jira=
 
 size=$(git diff -U0 --histogram --no-color $merge_base..$branch_name | grep -vE "^(diff|index|---|\+\+\+)" | sed -E 's/@@[^@]+@@.*//' | tr -d '\t' | tr -d ' ' | wc -c | tr -d ' ')
 
-jira_id=$(echo $branch_name | perl -ne '/.*([A-Z]{3,}-[0-9]+)$/ && print "$1"')
+jira_id=$(echo $branch_name | perl -ne '/([A-Z]{3,}-[0-9]+)$/ && print "$1"')
 
 if [[ -z "$jira_id" ]]; then
 	jira_id=$(git log -1 --pretty="%s" "$branch_name" | perl -ne '/\b([A-Z]{3,}-[0-9]+)\b/ && print "$1"')
