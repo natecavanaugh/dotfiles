@@ -169,13 +169,42 @@ function _complete_up {
 		local strpath=$( printf "%${curToken%%/*}s" ) # This creates a string with as many spaces as levels were specified.
 		local upDirSpec=${strpath// /../}  # Create the go-up-multiple-levels cd expression by replacing each space with '../'
 
+		local trailingpath="${curToken#*/}"
+
+		if [[ $trailingpath =~ ^[0-9]+$ ]]; then
+			trailingpath=""
+		fi
+
 		# Expand to absolute path (ending in '/' to facilitate optional further completion) and return.
 		local dir=$(cd "$upDirSpec"; echo -n "$PWD/")
+
 		if [[ "$dir" == '//' ]]; then dir='/'; fi # In case the target dir turns out to be the root dir, we've accidentally created '//' in the previous statement; fix it.
 		# !! Note that the path will appear *unquoted* on the command line and must therefore be properly \-escaped (e.g., a ' '  as '\ ').
 		# !! Escaping is performed automatially by virtue of defining the compspec with '-o filenames' (passed to 'complete').
-		COMPREPLY=("$dir")
 
+		dir="$dir"
+
+		# If we had started with something like up 2/mydir then let's add back the /mydir
+		if [[ -n $trailingpath ]]; then
+			# And check if we have a slash at the beginning
+			if [[ "${trailingpath:0:1}" != "/" && "${dir: -1}" != "/" ]]; then
+				trailingpath="/$trailingpath"
+			fi
+
+			#dir="${dir}${trailingpath}"
+
+			# dir="$(compgen -o dirnames -- "$dir")"
+
+			fullpathdir="${dir}${trailingpath}"
+
+			matches=$(compgen -o dirnames -- "$fullpathdir")
+
+			if [[ -n $matches ]]; then
+				dir=$matches
+			fi
+		fi
+
+		COMPREPLY=($dir)
 	else # Token is a name -> look for a prefix match among all the ancestral path components; use the first match found (i.e., the next match up in the hierarchy).
 
 		# Determine if we should do case-insensitive matching or not, depending on whether cases-insensitive completion was turned on globally via ~/.inputrc or /etc/inputrc.
@@ -201,7 +230,7 @@ function _complete_up {
 		local name
 		for name in ${parentPath:1}; do
 			pathSoFar+=/$name
-			if [[ "$name" == "$curToken"* ]]; then
+			if [[ "$name" == *"$curToken"* ]]; then
 				matchingPath="$pathSoFar/"
 			fi
 		done
@@ -215,10 +244,12 @@ function _complete_up {
 		[[ -n "$matchingPath" ]] && COMPREPLY=("$matchingPath")
 
 	fi
+
+	return 0
 }
 
 #Assign the auto-completion function _get for our command get.
-complete -o filenames -F _complete_up up
+complete -o plusdirs -o nospace -o filenames -F _complete_up up
 
 function le {
 	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' "${1:-*}"
