@@ -11,18 +11,20 @@ OPTIONS:
    -n      Allows to filter the remote branches by name
    -a      Show remotes and local branches
    -d      Show in descending order
-   -m      Show in descending order
-   -e      Show in descending order
+   -m      Show brances where my email is the on the latest commit
+   -e      Show brances where the specified email is on the latest commit
+   -p      Show the branches without formatting
 EOF
 }
 
 REMOTES_ONLY=0
 REMOTE_NAME=""
 ALL=0
+FORMAT=1
 DESC=""
 EMAIL_FILTER=""
 
-while getopts ":hrn:adme:" OPTION
+while getopts ":hrn:adpme:" OPTION
 do
      case $OPTION in
          h)
@@ -48,6 +50,9 @@ do
          e)
              EMAIL_FILTER=$OPTARG
              ;;
+         p)
+             FORMAT=0
+             ;;
          ?)
              usage
              exit
@@ -63,7 +68,19 @@ elif [[ $REMOTES_ONLY == 1 ]]; then
 	branches="refs/remotes/$REMOTE_NAME"
 fi
 
-results=$(git for-each-ref --sort=${DESC}committerdate $(echo $branches) --format='%(refname) - %(committerdate:relative) - %(author) %(subject)' | cut -d / -f 3- | awk -F" - " '{print "\033[33m" $1 "\033[39m - \033[36m" $2 "\033[32m " $3}')
+CYAN=""
+GREEN=""
+RESET=""
+YELLOW=""
+
+if [[ $FORMAT == 1 ]]; then
+    CYAN="\033[36m"
+    GREEN="\033[32m"
+    RESET="\033[39m"
+    YELLOW="\033[33m"
+fi
+
+results=$(git for-each-ref --sort=${DESC}committerdate $(echo $branches) --format='%(refname) - %(committerdate:relative) - %(author) %(subject)' | cut -d / -f 3- | awk -v YELLOW="$YELLOW" -v RESET="$RESET" -v CYAN="$CYAN" -v GREEN="$GREEN" -F" - " '{print YELLOW $1 RESET " - " CYAN $2 GREEN " " $3}')
 
 if [[ -n "$EMAIL_FILTER" ]]; then
     results=$(echo "$results" | grep "$EMAIL_FILTER")
