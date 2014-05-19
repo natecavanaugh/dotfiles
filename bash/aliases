@@ -365,7 +365,6 @@ alias abm='ant build-modules'
 alias abs='ant build-skins'
 alias abm='ant build-modules'
 alias abaf='ant build-alloy'
-alias aba='touch -c third-party/alloy-1.0.1.zip && abaf'
 
 # Misc
 
@@ -493,6 +492,22 @@ function abt {
 	start_dir="$PWD"
 
 	pw && ant build-themes
+
+	if [[ "$PWD" != "$start_dir" ]]; then
+		cd "$start_dir";
+	fi
+}
+
+# Navigate to the portal-web directory and run ant build-themes
+
+function aba {
+	start_dir="$PWD"
+
+	pw;
+
+	if [[ $? == 0 ]]; then
+		touch -c third-party/alloy-*.zip && abaf;
+	fi
 
 	if [[ "$PWD" != "$start_dir" ]]; then
 		cd "$start_dir";
