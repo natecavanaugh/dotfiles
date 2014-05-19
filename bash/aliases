@@ -23,6 +23,7 @@ function reload {
 }
 
 alias sbp='source ~/.bash_profile'
+alias sbi='bind -f ~/.inputrc'
 
 # Share history between terminal sessions
 # export history
