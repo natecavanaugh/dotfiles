@@ -379,7 +379,20 @@ alias hs="history | grep --color=auto"
 alias qlf='qlmanage -p "$@" >& /dev/null'
 
 # Find file by name
-alias fn='find . -name '
+# alias fn='find . -name '
+
+function fn {
+	args=". -name '$1'"
+	shift
+
+	while test $# -gt 0
+	do
+	    args="$args -o -name '$1'"
+	    shift
+	done
+
+	eval find "$args"
+}
 
 # Shortcut to SublimeText 2 cli
 alias so='~/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
