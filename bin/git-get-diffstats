@@ -43,7 +43,7 @@ ref_spec=$1
 if [[ $NAMES == 0 ]]; then
 	git diff --stat $ref_spec
 else
-	files=$(git diff --numstat $ref_spec | awk '{ print $3 }')
+	files=$(git diff --numstat $ref_spec | cut -f3-)
 
 	if [[ $RELATIVE == 0 ]]; then
 		echo "$files"
