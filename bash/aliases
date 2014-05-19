@@ -466,12 +466,25 @@ function compare () {
 
 # Navigate to the portal-web directory of any Liferay repo
 
+function pr () {
+	top_level=$(git rev-parse --show-toplevel 2>/dev/null)
+	if [[ -n "$top_level" && -d "$top_level" ]]; then
+		cd "$top_level"
+	else
+		echo "Nowhere to go..."
+		return 1;
+	fi
+}
+
+# Navigate to the portal-web directory of any Liferay repo
+
 function pw () {
 	top_level=$(git rev-parse --show-toplevel 2>/dev/null)
 	if [[ -n "$top_level" && -d "$top_level/portal-web" ]]; then
 		cd "$top_level/portal-web"
 	else
 		echo "Nowhere to go..."
+		return 1;
 	fi
 }
 
@@ -483,6 +496,7 @@ function pi () {
 		cd "$top_level/portal-impl"
 	else
 		echo "Nowhere to go..."
+		return 1;
 	fi
 }
 
