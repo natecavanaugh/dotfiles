@@ -156,9 +156,9 @@
 	# lg graph with the changes between the current branch and master
 	lgm = !git lg $(git getm)..
 	# lg graph with grepping on the log
-	lgg = "!f() { git lg --grep=\"$1\"; }; f"
+	lgg = "!f() { pattern=$1; shift; git lg --grep=\"$pattern\" $@; }; f"
 	# lg graph with searching the changes
-	lgs = "!f() { git lg -S\"$1\"; }; f"
+	lgs = "!f() { pattern=$1; shift; git lg -S\"$pattern\" $@; }; f"
 	# lg graph of just the latest commit
 	hd = !git --no-pager log --pretty=format:'%Cred%h%Creset - %s %Cgreen(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative -1
 	hdd = !git lgd -1
