@@ -109,7 +109,7 @@
 	# Delete a remote branch
 	db-remote = !sh -c 'git push origin :$0'
 	# Delete both the local and remote branches
-	db-all = !sh -c 'git db $0 && git db-remote $0'
+	db-all = "!f() { git db $1; git db-remote $1; }; f"
 
 	# Delete the current local branch and checkout master
 	dbc = "!f() { local bn=$1; [[ -z $bn ]] && bn=$(git brn); master=$(git getm); [[ $bn == $master ]] && echo Cannot remove "$master" && exit; git co $master && git db $bn; }; f"
