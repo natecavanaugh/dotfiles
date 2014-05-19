@@ -105,10 +105,11 @@ if [[ -d $HOME/bin_private ]]; then
 	export PATH=$HOME/bin_private:$PATH
 fi
 
+INPUTRC='~/.inputrc'
 
 # Config settings
 
 # better tab complete
 # Automatically cycles through completions
 # instead of just displaying them
-bind 'TAB:menu-complete'
+[[ $- == *i* ]] && bind 'TAB:menu-complete'
