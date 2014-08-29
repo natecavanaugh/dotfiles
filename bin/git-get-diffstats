@@ -10,14 +10,16 @@ This script will list the difference stats between two git commits
 OPTIONS:
 	-h	Show this message
 	-f	Show the filenames that were modified
+	-m	Only show modified files (ignores deleted files)
 	-r	Show the filenames that were modified relative to the current directory
 EOF
 }
 
+IGNORE_DELETES=0
 NAMES=0
 RELATIVE=0
 
-while getopts ":hrf" OPTION
+while getopts ":hrfm" OPTION
 do
 	 case $OPTION in
 		 h)
@@ -26,6 +28,9 @@ do
 			;;
 		 f)
 			NAMES=1
+			;;
+		 m)
+			IGNORE_DELETES=1
 			;;
 		 r)
 			RELATIVE=1
@@ -43,7 +48,15 @@ ref_spec=$1
 if [[ $NAMES == 0 ]]; then
 	git diff --stat $ref_spec
 else
-	files=$(git diff --numstat $ref_spec | cut -f3-)
+	diff_cmd="git diff --name-status $ref_spec"
+
+	if [[ $IGNORE_DELETES == 1 ]]; then
+		diff_cmd="$diff_cmd | grep -vE '^D'"
+	fi
+
+	diff_cmd="$diff_cmd | cut -f2-"
+
+	files=$(eval $diff_cmd)
 
 	if [[ $RELATIVE == 0 ]]; then
 		echo "$files"
