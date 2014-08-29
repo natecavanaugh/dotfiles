@@ -70,6 +70,8 @@ export NC_GIT_HOME="${NC_DEV_WORK_PATH}/git/natecavanaugh"
 
 export NC_BIN_PATH="${HOME}/.bin"
 
+export NC_NL=$'\n'
+
 export NODE_PATH="/usr/local/lib/node_modules:/usr/local/share/npm/lib/node_modules"
 
 export BASH_COMPLETION_PATH=`brew --prefix 2>/dev/null`/etc/bash_completion

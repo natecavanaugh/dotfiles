@@ -295,13 +295,25 @@ function details {
 # Process finder
 # @argument name of process
 function pf {
-	ps ax | grep "$1" | grep -v grep | awk '{ print $1 }'
+	args="ps ax | grep '$1'"
+	shift
+
+	while test $# -gt 0
+	do
+	    args="$args | grep '$1'"
+	    shift
+	done
+
+	args="$args | grep -v grep | awk '{ print \$1 }'"
+
+	eval "$args"
+	# ps ax | grep "$1" | grep -v grep | awk '{ print $1 }'
 }
 
 # Process killer
 # @argument name of process
 function pfkill {
-	pf $1 | xargs kill -9
+	pf "$@" | xargs kill -9
 	#ps -ef | grep PROCESS | grep -v grep | awk '{print $2}' | xargs kill -9
 }
 
