@@ -1,4 +1,5 @@
 *_build
 *_private
 gitconfig_user
+node_modules
 .DS_Store
