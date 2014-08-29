@@ -18,8 +18,8 @@
 
 # cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
 
-
 function notify {
+	git ivy
 	echo $1
 	[[ `command -v terminal-notifier` ]] && terminal-notifier -message "$1"
 }
@@ -63,6 +63,14 @@ if [[ -d "$dir_path" ]]; then
 	if [ $status = 0 ]; then
 		# liferay dev
 
+		if [[ -d "$dir_path/.ivy" ]]; then
+			ivy=$(git ivy)
+
+			if [[ "$ivy" == *"Removing .ivy/"* ]]; then
+				echo "Ivy cleaned"
+			fi
+		fi
+
 		if [[ -f "$dir_path/../startup.sh" ]]; then
 			$dir_path/../startup.sh
 		else
@@ -97,6 +105,7 @@ if [[ -d "$dir_path" ]]; then
 				# port=$(perl -ne '/<Connector port="([^"]+)" protocol="(org\.apache\.coyote\.http11\.Http11NioProtocol|HTTP\/1\.1)"/ && print "$1" and exit;' "$tomcat_path/conf/server.xml")
 				# echo "-- $port ---"
 				# (sleep 30; $(open -g "http://localhost:${port:-8080}"))&
+
 				$tomcat_path/bin/catalina.sh run
 			else
 				notify "Could not find an app server to start"
