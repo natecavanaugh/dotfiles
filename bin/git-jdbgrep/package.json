@@ -1,0 +1,15 @@
+{
+  "name": "git-jdbgrep",
+  "version": "0.0.0",
+  "description": "Deletes git branches based on a grep pattern",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nate Cavanaugh",
+  "license": "MIT",
+  "dependencies": {
+    "cli": "^0.5.0",
+    "commander": "^2.2.0"
+  }
+}

@@ -3,8 +3,8 @@
 var child = require('child_process');
 var http = require('https');
 var fs = require('fs');
-var cli = require('./cli.js');
-var program = require('./commander.js');
+var cli = require('cli');
+var program = require('commander');
 
 var options = cli.parse(
 	{
