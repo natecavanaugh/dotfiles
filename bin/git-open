@@ -10,8 +10,10 @@ This script will open the files in the specified commit range
 
 OPTIONS:
    -h      Show this message
-   -a      open all files (including binary)
-   -l      just return a list of the files to be open (useful for piping to other commands)
+   -a      Open all files (including binary)
+   -l      Just return a list of the files to be open (useful for piping to other commands)
+   -m      Open files modified in the work tree, but not committed
+   -s      Open staged files
    -o      Only open file extensions (pipe delimited)
    -v      Verbose mode, basically prints a message for every file
    -x      Exclude file extensions (pipe delimited)
@@ -23,8 +25,10 @@ VERBOSE=0
 LIST=0
 EXTENSIONS=""
 ONLY_EXTENSIONS=""
+MODIFIED_FILES=0
+MODIFIED_FILES_STAGED=0
 
-while getopts ":halo:vx:" OPTION
+while getopts ":halo:vx:ms" OPTION
 do
      case $OPTION in
          h)
@@ -41,7 +45,13 @@ do
              ONLY_EXTENSIONS=$OPTARG
              ;;
          v)
-             VERBOSE=$OPTARG
+             VERBOSE=1
+             ;;
+         s)
+             MODIFIED_FILES_STAGED=1
+             ;;
+         m)
+             MODIFIED_FILES=1
              ;;
          x)
              EXTENSIONS=$OPTARG
@@ -55,6 +65,16 @@ done
 shift $(($OPTIND - 1))
 
 ref_spec=$(git get-custom-refspec $1);
+
+diff_opts=""
+
+if [[ $MODIFIED_FILES == 1 || $MODIFIED_FILES_STAGED == 1 ]]; then
+	ref_spec=""
+
+	if [[ $MODIFIED_FILES_STAGED == 1 ]]; then
+		diff_opts="--cached"
+	fi
+fi
 
 editor=`git config --get user.editor`;
 
@@ -70,7 +90,7 @@ if [[ ! -e "$editor" ]]; then
 	exit 1;
 fi
 
-files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB --relative $ref_spec`;
+files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB --relative $diff_opts $ref_spec`;
 
 useopen=`command -v open`;
 usecygwin=`command -v cygstart`;
