@@ -10,13 +10,15 @@ OPTIONS:
 	-h	Show this message
 	-r	use the specified remote (default is origin)
 	-f	load the specified file
+	-p	Only print the url
 EOF
 }
 
 DEFAULT_REMOTE="origin"
 FILE=""
+PRINT=0
 
-while getopts ":hr:u:f:" OPTION
+while getopts ":hr:pf:" OPTION
 do
 	 case $OPTION in
 		 h)
@@ -29,6 +31,9 @@ do
 		 f)
 			FILE="$OPTARG"
 			;;
+		 p)
+			PRINT=1
+			;;
 		 ?)
 			usage
 			exit
@@ -38,8 +43,13 @@ done
 shift $(($OPTIND - 1))
 
 remotes=$(git remote -v)
-commit=${1:-HEAD}
+commit="$1"
 mode="commit"
+
+if [[ -z "$commit" ]]; then
+	commit=$(git getm)
+	mode="tree"
+fi
 
 if [[ $commit == "head" ]]; then
 	commit="HEAD"
@@ -53,7 +63,12 @@ elif [[ ! $commit =~ ^[A-Za-z0-9-]+$ ]]; then
 fi
 
 if [[ -n "$FILE" ]]; then
-	mode="blob"
+	if [[ -f "$FILE" ]]; then
+		mode="blob"
+	elif [[ -d "$FILE" ]]; then
+		mode="tree"
+	fi
+
 	git_path="$(git rev-parse --show-toplevel)/"
 	full_file_path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$FILE")
 	commit="$commit/${full_file_path:${#git_path}}"
@@ -61,7 +76,11 @@ fi
 
 github_url=$(echo "$remotes" | perl -lne "s#^$DEFAULT_REMOTE.*\s.*(?:https://github\.com/|github\.com:|git://github\.com/)(.*)/(.*)(?:\.git).*\$#https://github.com/\$1/\$2/$mode/$commit# && print && exit")
 
-open $github_url
+if [[ $PRINT == 1 ]]; then
+	echo $github_url
+else
+	open $github_url
+fi
 # echo $github_url
 
 # (matches[0], matches[1], mode, target, new_git_path, file_name, lines)
