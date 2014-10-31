@@ -292,6 +292,8 @@ function details {
 	return 1
 }
 
+alias d='details'
+
 # Process finder
 # @argument name of process
 function pf {
