@@ -4,7 +4,7 @@ export EDITOR="subl -w";
 
 export SMARTGIT_MAX_HEAP_SIZE=2048m
 
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_45.jdk/Contents/Home
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home
 
 export ANT_OPTS="-Xms512m -Xmx1024m -XX:MaxPermSize=512m"
 
@@ -26,7 +26,7 @@ export NC_DATA_PATH="$HOME/Data"
 
 export NC_LIFERAY_PATH="$NC_DEV_PATH/Liferay"
 
-export NC_TRUNK_DEV_PATH="$NC_LIFERAY_PATH/Trunk"
+export NC_TRUNK_DEV_PATH="$NC_LIFERAY_PATH/Master"
 
 export NC_EE_PATH="$NC_LIFERAY_PATH/EE"
 
