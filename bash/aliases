@@ -269,9 +269,9 @@ function le2w {
 }
 
 # details
-# Shows either the file name, alias info, or function definition
+# Shows either the variable value, file name, alias info, or function definition
 # for a given executable.
-# @argument name of function, alias, or script to list the details for
+# @argument name of variable, function, alias, or script to list the details for
 function details {
 	if [[ `command -v "$1"` ]]; then
 		cmd_type="$(type -t $1)"
@@ -282,17 +282,29 @@ function details {
 			which "$1" 2> /dev/null
 		elif [[ $cmd_type == "function" ]]; then
 			declare -f "$1" 2> /dev/null
+			shopt -s extdebug
+			declare -F "$1"
+			shopt -u extdebug
 		else
 			type -a "$1" 2> /dev/null
 		fi
 	else
-		echo "$1 doesn't seem to exist"
+		# let's check if it's a variable
+		if [[ -n ${!1+x} ]]; then
+			echo "\$$1 is a variable set to: ${!1}"
+		else
+			echo "$1 doesn't seem to exist"
+		fi
 	fi
 
 	return 1
 }
 
 alias d='details'
+
+# add autocompletion for details and it's alias
+complete -c -v details
+complete -c -v d
 
 # Process finder
 # @argument name of process
@@ -466,8 +478,8 @@ function jspfcss () {
 
 function compare () {
 	if [[ -f "$1" && -f "$2" ]]; then
-		file_1=$(md5 "$1" | awk '{ print $4 }')
-		file_2=$(md5 "$2" | awk '{ print $4 }')
+		file_1=$(md5 "$1" | sed "s#$1#_#" | awk '{ print $4 }')
+		file_2=$(md5 "$2" | sed "s#$2#_#" | awk '{ print $4 }')
 
 		if [[ $file_1 == $file_2 ]]; then
 			echo "Both files are equal ($file_1)"
