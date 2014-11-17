@@ -2,8 +2,6 @@
 	quotepath = false
 	autocrlf = input
 	excludesfile = ~/.gitignore
-[init]
-	templatedir = ~/.git_template
 [color]
 	ui = auto
 [alias]
