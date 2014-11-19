@@ -47,10 +47,10 @@ def main():
 		if attr_type:
 			attr_type = '%s;' % attr_type
 
-			text = color_str.format(
-				attr_type,
-				color_code,
-				text)
+		text = color_str.format(
+			attr_type,
+			color_code,
+			text)
 
 	print text
 
