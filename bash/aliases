@@ -555,12 +555,20 @@ function aba {
 	fi
 }
 
-# Navigate to the portal-impl directory and run ant format-source
+# Navigate to the portal-impl (or the root of the project) directory and run ant format-source
 
 function afs {
 	start_dir="$PWD"
 
-	pi && ant format-source
+	{ pi || pr; } 1>/dev/null
+
+	local lastcmd="$?"
+
+	if [[ "$lastcmd" == 0 && -f "build.xml" ]]; then
+		grep -q 'format-source' build*.xml && ant format-source
+	else
+		echo "not there"
+	fi
 
 	if [[ "$PWD" != "$start_dir" ]]; then
 		cd "$start_dir";
