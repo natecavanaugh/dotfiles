@@ -2,6 +2,7 @@
 	quotepath = false
 	autocrlf = input
 	excludesfile = ~/.gitignore
+	editor = subl -n -w
 [color]
 	ui = auto
 [alias]
