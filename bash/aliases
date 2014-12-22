@@ -90,7 +90,7 @@ function git_track() {
 # Navigation
 
 function cdl {
-	cd $1;
+	cd "$1";
 	ls -l
 }
 
