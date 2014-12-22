@@ -396,8 +396,8 @@ if [[ $UNAME == "Darwin" && $(command -v lsc) ]]; then
 	LS_COMMAND="lsc"
 fi
 
-alias ls='$LS_COMMAND --color=tty'     #set the color settings on in the color ls program
-alias l='$LS_COMMAND --color=tty -lg'
+alias ls='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p"'     #set the color settings on in the color ls program
+alias l='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p" -lg'
 
 # -- Paths
 
