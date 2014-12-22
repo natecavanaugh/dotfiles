@@ -252,6 +252,22 @@ function _complete_up {
 #Assign the auto-completion function _get for our command get.
 complete -o plusdirs -o nospace -o filenames -F _complete_up up
 
+# Delete current directory
+function dlc {
+	curr_dir="$PWD"
+	# curr_dir="$(pwd -P)"
+	read -p "Are you sure you want to delete $PWD? [y/N]: " delete_dir
+	if [[ "$delete_dir" =~ [Yy] ]]; then
+		echo "Deleting $curr_dir"
+		rm -rf "$curr_dir" && cd ../
+	fi
+}
+
+# Make a directory and cd into it
+function mkcd () {
+	mkdir "$1" && cd "$1"
+}
+
 function le {
 	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' "${1:-*}"
 }
