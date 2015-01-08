@@ -157,9 +157,9 @@
 	# lg graph with the changes between the current branch and master
 	lgmb = !git lg $(git mb $(git getm))..
 	# lg graph with the changes between the current branch and upstream/master
-	lgu = !git lg $(git getm -r upstream)..
+	lgu = "!f() { upstream=\"$(git getm -r upstream)\"; log=$(git lg $upstream..HEAD); [[ -z \"$log\" ]] && log=$(git lg HEAD..$upstream); echo \"$log\"; }; f"
 	# lg graph with the changes between the current branch and origin/master
-	lgo = !git lg $(git getm -r origin)..
+	lgo = "!f() { upstream=\"$(git getm -r origin)\"; log=$(git lg $upstream..HEAD); [[ -z \"$log\" ]] && log=$(git lg HEAD..$upstream); echo \"$log\"; }; f"
 	# lg graph with grepping on the log
 	lgg = "!f() { pattern=$1; shift; git lg --grep=\"$pattern\" $@; }; f"
 	# lg graph with searching the changes
