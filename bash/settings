@@ -97,11 +97,8 @@ export GIT_PS1_SHOWUPSTREAM="verbose"
 
 export XUGGLE_HOME=/usr/local/xuggler
 export PATH=$XUGGLE_HOME/bin:$PATH
-export RHINO_HOME=$NC_DEV_PATH/Experimental/rhino1_7r2
 
-ICONIC_PATH="$NC_DEV_WORK_PATH/git/natecavanaugh/iconic-uni.font"
-
-export PATH=/usr/local/bin:/usr/local/mysql/bin:$NC_DATA_PATH/eg-mainline:${NC_SHELL_PATH}:$HOME/.bin:$HOME/Downloads/AdobeAIRSDK/bin:$PATH:${ICONIC_PATH}/support/font-builder/support/ttf2eot:${ICONIC_PATH}/support/font-builder/support/ttfautohint/frontend:${ICONIC_PATH}/support/font-builder/bin:/usr/local/share/npm/bin
+export PATH=/usr/local/bin:/usr/local/mysql/bin:$HOME/.bin:$PATH:/usr/local/share/npm/bin
 
 if [[ -d $HOME/bin_private ]]; then
 	export PATH=$HOME/bin_private:$PATH
