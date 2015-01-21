@@ -141,7 +141,7 @@ if [[ $total_files -gt $MAX_FILES ]]; then
 	done
 
 	if [[ $requested_files -gt $MAX_FILES ]]; then
-		read -p "This will open $requested_files files. Are you sure? (y)es or (n)o: " confirm_files
+		read -p "This will open $requested_files files. Are you sure? [y/N]: " confirm_files
 		[[ "$confirm_files" == "y" || "$confirm_files" == "yes" ]] && CONFIRM_OPEN=1
 	elif [[ $requested_files -gt 0 ]]; then
 		CONFIRM_OPEN=1
