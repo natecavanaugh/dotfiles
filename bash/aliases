@@ -379,6 +379,14 @@ alias abs='ant build-skins'
 alias abm='ant build-modules'
 alias abaf='ant build-alloy'
 
+#NPM
+alias ni='npm install'
+alias ngi='npm install -g'
+alias nis='npm install --save'
+alias nid='npm install --save-dev'
+alias ns='npm search'
+alias nd='npm docs'
+
 # Misc
 
 # Github pull from user
