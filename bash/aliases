@@ -95,7 +95,8 @@ function cdl {
 }
 
 function upl {
-	cdl ..
+	up "$@"
+	ls -l
 }
 
 # Convenience function for moving up levels in the path to the current working directory.
@@ -251,6 +252,7 @@ function _complete_up {
 
 #Assign the auto-completion function _get for our command get.
 complete -o plusdirs -o nospace -o filenames -F _complete_up up
+complete -o plusdirs -o nospace -o filenames -F _complete_up upl
 
 # Delete current directory
 function dlc {
