@@ -602,13 +602,62 @@ function finda {
 }
 
 function details {
+	local OPTIND=1 OPTARG OPTION
+
+	usage()
+	{
+		cat <<EOF
+usage: $0 options
+
+details
+Shows either the variable value, file name, alias info, or function definition
+for a given executable.
+@argument name of variable, function, alias, or script to list the details for
+
+OPTIONS:
+   -h      Show this message
+   -r      Resolve a symlink or an alias
+EOF
+	}
+
+	RESOLVE=0
+
+	while getopts ":hr" OPTION
+	do
+	     case $OPTION in
+	         h)
+	             usage
+	             return
+	             ;;
+	         r)
+	             RESOLVE=1
+	             ;;
+	         ?)
+	             usage
+	             return
+	             ;;
+	     esac
+	done
+	shift $(($OPTIND - 1))
+
 	local NO_EXIST="$1 doesn't seem to exist"
 
 	if [[ $(command -v "$1") && ! -e "$1" ]]; then
 		local cmd_type="$(type -t "$1")"
 
 		if [[ $cmd_type == "alias" ]]; then
-			alias "$1" 2> /dev/null
+			local ref=$(alias "$1" 2> /dev/null)
+			if [[ $RESOLVE == 1 ]]; then
+				alias_cmd="$(sed -re "s/alias "$1"='(\S+).*'$/\1/" <<< "$ref")"
+				alias_cmd=$(echo "$alias_cmd" | sed 's/\$//')
+				if [[ "$alias_cmd" == "$1" ]]; then
+					alias_cmd=$(which "$alias_cmd")
+				fi
+				# echo "alias_cmd: $alias_cmd"
+				details -r "$alias_cmd"
+			else
+				echo "$ref"
+			fi
 		elif [[ $cmd_type == "file" ]]; then
 			which "$1" 2> /dev/null
 		elif [[ $cmd_type == "function" ]]; then
