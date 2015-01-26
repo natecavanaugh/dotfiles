@@ -597,10 +597,10 @@ function light() {
   $src | highlight -O rtf --syntax $1 --font Inconsolata --font-size 24 --style fine_blue | pbcopy
 }
 
-# details
-# Shows either the variable value, file name, alias info, or function definition
-# for a given executable.
-# @argument name of variable, function, alias, or script to list the details for
+function finda {
+	alias | grep -i "$1" | sed -E "s/^alias ([^=]+)='(.*)'/\1 \2/" | awk -v nr=2 '{printf "\033[31m%_10s\033[1;37m", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf "%s%s", sep, $x; }; print "\033[0;39m"}';
+}
+
 function details {
 	local NO_EXIST="$1 doesn't seem to exist"
 
