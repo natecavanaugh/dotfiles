@@ -3,6 +3,7 @@
 source ~/.bash/prompt
 source ~/.bash/settings
 source ~/.bash/aliases
+source ~/.bash/functions
 source ~/.bash/bash_apparix
 
 if [ -f "$HOME/.bash_profile.$USER" ]; then
