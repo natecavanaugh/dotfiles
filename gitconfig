@@ -42,8 +42,8 @@
 	# but automatically creates a message using the last JIRA ticket it can find (if any)
 	# can take one optional parameter which is the message to use after the
 	# ticket ID (by default, this is "Source formatting")
-	camm = "!f() { ticketId=$(git get-latest-jira-id $2); git commit -a -m \"$ticketId - ${1:-Source formatting}\"; }; f"
-	cimm = "!f() { ticketId=$(git get-latest-jira-id $2); git commit -m \"$ticketId - ${1:-Source formatting}\"; }; f"
+	camm = "!f() { ticketId=$(git get-latest-jira-id $2); [[ -n $ticketId ]] && ticketId=\"$ticketId - \"; git commit -a -m \"$ticketId${1:-Source formatting}\"; }; f"
+	cimm = "!f() { ticketId=$(git get-latest-jira-id $2); [[ -n $ticketId ]] && ticketId=\"$ticketId - \"; git commit -m \"$ticketId${1:-Source formatting}\"; }; f"
 
 	## Branches
 	##--------
@@ -179,7 +179,7 @@
 	# Pop stash (newest by default)
 	sp = "!f() { local stash_rev=stash@{${1:-0}}; git stash pop $stash_rev;  }; f"
 	# Save stash (includes untracked files)
-	ss = !git add . && git stash save
+	ss = stash save --include-untracked
 	# List all entries in the stash
 	sl = stash list
 	# List all entries in the stash with the --stat option
@@ -244,7 +244,7 @@
 	prtj = pull-request transition-jira
 	# Rejects a pull
 	# eg. git prcj joe.bloggs
-	prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; if ! [[ $# -ge 2 ]]; then comment=\"$user\"; user=\"\"; read -p \"It doesn't appear that you've passed a user. Who do you want to reassign it to? [Liferay or Github username]: \" user; fi; git pr close \"$comment\" && git pr transition-jira $ticket \"Requires Additional Work\" \"$user\"; }; f"
+	prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; if ! [[ $# -ge 2 ]]; then comment=\"$user\"; user=\"\"; read -p \"It doesn't appear that you've passed a user. Who do you want to reassign it to? [Liferay or Github username]: \" user; fi; git pr close \"$comment\" && git pr transition-jira $ticket \"Requires Additional Work,Needs Refinement\" \"$user\"; }; f"
 	#\"$user\" =~ ^[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+$ || \"$user\" =~ ^[a-zA-Z0-9-_]+$
 	#
 	# prcj = "!f(){ user=\"$1\"; comment=\"$2\"; ticket=\"${3:-$(git get-latest-jira-id)}\"; [[ -n \"$comment\" ]] && echo 'has comment'; echo \"user = $user, comment = $comment, ticket = $ticket\"; }; f"
