@@ -1,7 +1,7 @@
 *.sublime-project
 *.sublime-workspace
 *.sass-cache
-node_modules
+node_modules/*
 .hg
 .DS_Store
 .svn
