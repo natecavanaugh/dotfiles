@@ -2,26 +2,6 @@
 
 alias aa="ant -Dlint.failonerror=false all"
 
-# System aliases
-
-alias mlog="tail -f /var/log/mail.log"
-alias pfs="sudo postfix start"
-
-# Utility
-
-function dotfilespath {
-	dirname $(resolve "$HOME/.bash_profile")
-}
-
-function reload {
-	dotfiles="$(dotfilespath)"
-	install_script="${dotfiles}/install.sh"
-
-	if [[ -d "$dotfiles" && -f "$install_script" ]]; then
-		$install_script
-	fi
-}
-
 alias sbp='source ~/.bash_profile'
 alias sbi='bind -f ~/.inputrc'
 
@@ -47,11 +27,6 @@ alias gitk="/usr/bin/wish $(which gitk)"
 # Alias "g" to "git" command, but preserving git-completion
 alias g="git"
 complete -o default -o nospace -F _git g
-
-# Alias gh to git help
-function gu {
-	cd $(git rev-parse --show-toplevel);
-}
 
 # Alias gh to git help
 alias gh="git help"
@@ -81,10 +56,6 @@ function dropdb {
 function cleardb {
 	mysqlexec "drop database if exists \`$1\`; create database \`$1\`
 CHARACTER SET utf8;"
-}
-
-function git_track() {
-	echo "\n[branch \"$1\"]\n\tremote = origin\n\tmerge = refs/heads/$1" >> ".git/config"
 }
 
 # Navigation
@@ -343,54 +314,17 @@ alias l='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p" -lg'
 
 alias dotfiles='cd $(dirname $(resolve "$HOME/.bash_profile"))'
 
-# Liferay paths
-alias lde='cd $NC_TRUNK_DEV_PATH;'
-
-alias l60='cd $NC_BRANCHES_PATH/6.0.x;'
-alias l60p='cd $NC_BRANCHES_PATH/6.0.x/portal;'
-
-alias l61='cd $NC_BRANCHES_PATH/6.1.x;'
-alias l61p='cd $NC_BRANCHES_PATH/6.1.x/portal;'
-
-# Alloy paths & misc
-alias aui='cd $NC_ALLOY_PATH;'
-alias auid='cd $NC_ALLOY_DEPRECATED_PATH;'
-alias aui1='cd $NC_ALLOY_1_PATH;'
-alias aui15='cd $NC_ALLOY_15_PATH;'
-alias aui2='cd $NC_ALLOY_2_PATH;'
-alias aui2d='cd $NC_ALLOY_2D_PATH;'
-
-alias myg='cd $NC_GIT_HOME;'
-
 # -- Commands
 
 # Ant
 alias aa='ant all'
 alias ad='ant deploy'
 alias acd='ant clean deploy'
-alias abm='ant build-modules'
-alias abs='ant build-skins'
-alias abm='ant build-modules'
-alias abaf='ant build-alloy'
-
-#NPM
-alias ni='npm install'
-alias ngi='npm install -g'
-alias ngu='npm update -g'
-alias nis='npm install --save'
-alias nid='npm install --save-dev'
-alias nus='npm uninstall --save'
-alias nuds='npm uninstall --save-dev'
-alias ns='npm search'
-alias nd='npm docs'
 
 # Misc
 
 # Search history
 alias hs="history | grep --color=auto"
-
-# QuickLook file
-alias qlf='qlmanage -p "$@" >& /dev/null'
 
 # Find file by name
 # alias fn='find . -name '
@@ -418,43 +352,6 @@ alias so='~/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 function resolve {
 	[ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); resolve "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|");
-}
-
-# Extract Git commit ID from generated alloy zip
-# @argument path to zip
-function az {
-	if [[ ! $1 =~ '.zip'$ ]]; then
-		echo "This command only works with zip files :)"
-		return 1;
-	fi
-
-	delfile=0
-
-	name=$1
-	if [[ $1 == *:* ]]; then
-		treeish=$1
-		name="/tmp/alloy_${RANDOM}.zip"
-		delfile=1
-		git show -p $treeish > $name
-	fi
-
-	unzip -z $name;
-
-	[[ $delfile == 1 ]] && rm $name;
-}
-
-function auis_impl {
-	cd $1;
-	git log -1 --format="%h" | tr -d '\n'
-}
-
-function jspfcss () {
-	cd "${NC_TRUNK_PW_HTML_PATH}/portal/css";
-	filelist=''
-	for f in `ls -R | grep -E '.jspf'`; do
-		filelist="$filelist '$f',";
-	done
-	echo $filelist
 }
 
 # Do a checksum comparison of two files to verify if
@@ -527,7 +424,7 @@ function abt {
 	fi
 }
 
-# Navigate to the portal-web directory and run ant build-themes
+# Navigate to the portal-web directory and run ant build-alloy
 
 function aba {
 	start_dir="$PWD"
@@ -563,18 +460,6 @@ function afs {
 	fi
 }
 
-# Generate a background-image formatted data URI from an image
-# and add it to the clipboard.
-# @argument path to image
-
-if [[ `command -v base64` ]]; then
-	function base64img () {
-		str=$(base64 $1 | tr -d '\r\n')
-
-		echo -n "url(data:text/plain;charset=utf-8;base64,$str)" | pbcopy
-	}
-fi
-
 # Check any website to see if it is running on Liferay
 # as well as what version it is.
 # This assumes they haven't disabled the Liferay-Portal header
@@ -582,24 +467,6 @@ fi
 
 function lfrv () {
 	curl -ILs $1 | grep --color=auto "Liferay"
-}
-
-# Quick way to rebuild the Launch Services database and get rid
-# of duplicates in the Open With submenu.
-alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
-
-function light() {
-  syntax="$1"
-  shift
-
-  if [ ! -f "$1" ]
-    then src="pbpaste"
-  else
-    src="cat $1"
-    shift
-  fi
-
-  $src | highlight -O rtf --syntax $syntax --font Inconsolata --font-size 24 --style fine_blue "$@" | pbcopy
 }
 
 function finda {
