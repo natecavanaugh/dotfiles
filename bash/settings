@@ -2,10 +2,6 @@
 
 export EDITOR="subl -w";
 
-export SMARTGIT_MAX_HEAP_SIZE=2048m
-
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.7.0_71.jdk/Contents/Home
-
 export ANT_OPTS="-Xms512m -Xmx1024m -XX:MaxPermSize=512m"
 
 export GREP_OPTIONS="--exclude=\*.svn\*"
@@ -72,14 +68,10 @@ export NC_BIN_PATH="${HOME}/.bin"
 
 export NC_NL=$'\n'
 
-export NODE_PATH="/usr/local/lib/node_modules"
-
 export BASH_COMPLETION_PATH=`brew --prefix 2>/dev/null`/etc/bash_completion
 
 export MYSQL_PS1="(\u@\h) [\d]> "
 
-export hd="HEAD"
-export m="master"
 export LESS="FRX"
 
 export HISTCONTROL=erasedups
@@ -94,9 +86,6 @@ export GIT_PS1_SHOWDIRTYSTATE="true";
 export GIT_PS1_SHOWUNTRACKEDFILES="true";
 # # Show upstream state
 export GIT_PS1_SHOWUPSTREAM="verbose"
-
-export XUGGLE_HOME=/usr/local/xuggler
-export PATH=$XUGGLE_HOME/bin:$PATH
 
 export PATH=/usr/local/bin:/usr/local/mysql/bin:$HOME/.bin:$PATH:/usr/local/share/npm/bin
 
