@@ -266,7 +266,7 @@ function dlc {
 }
 
 # Make a directory and cd into it
-function mkcd () {
+function mcd () {
 	mkdir "$1" && cd "$1"
 }
 
@@ -376,8 +376,11 @@ alias abaf='ant build-alloy'
 #NPM
 alias ni='npm install'
 alias ngi='npm install -g'
+alias ngu='npm update -g'
 alias nis='npm install --save'
 alias nid='npm install --save-dev'
+alias nus='npm uninstall --save'
+alias nuds='npm uninstall --save-dev'
 alias ns='npm search'
 alias nd='npm docs'
 
@@ -589,16 +592,25 @@ function lfrv () {
 alias fixopenwith='/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user'
 
 function light() {
-  if [ -z "$2" ]
+  syntax="$1"
+  shift
+
+  if [ ! -f "$1" ]
     then src="pbpaste"
   else
-    src="cat $2"
+    src="cat $1"
+    shift
   fi
-  $src | highlight -O rtf --syntax $1 --font Inconsolata --font-size 24 --style fine_blue | pbcopy
+
+  $src | highlight -O rtf --syntax $syntax --font Inconsolata --font-size 24 --style fine_blue "$@" | pbcopy
 }
 
 function finda {
 	alias | grep -i "$1" | sed -E "s/^alias ([^=]+)='(.*)'/\1 \2/" | awk -v nr=2 '{printf "\033[31m%_10s\033[1;37m", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf "%s%s", sep, $x; }; print "\033[0;39m"}';
+}
+
+function right {
+	printf '%*s' $(tput cols) "$@"
 }
 
 function details {
