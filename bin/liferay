@@ -1,23 +1,5 @@
 #!/bin/sh
 
-# base_path="${NC_TRUNK_DEV_PATH}"
-
-# if [[ -n "$1" ]]; then
-# 	if [[ $1 == "60" ]]; then
-# 		base_path="${NC_BRANCHES_PATH}/6.0.x"
-# 	elif [[ $1 == "52" ]]; then
-# 		base_path="${NC_BRANCHES_PATH}/5.2.x"
-# 	elif [[ $1 == "maint" ]]; then
-# 		base_path="${NC_TRUNK_MAINT_PATH}"
-# 	fi
-# fi
-
-# base_path="${base_path}/tomcat/bin/catalina.sh run"
-
-# $base_path
-
-# cd "$NC_TRUNK_DEV_PATH/liferay-portal/"
-
 function notify {
 	git ivy
 	echo $1
@@ -33,8 +15,8 @@ if [[ $dir_path != *"."* && $dir_path != *"/"* ]]; then
 	dir_path=""
 fi
 
-if [[ -z $dir_path ]]; then
-	dir_path="$NC_TRUNK_PORTAL_PATH"
+if [[ -z $dir_path && -n "$NC_MASTER_PORTAL_PATH" ]]; then
+	dir_path="$NC_MASTER_PORTAL_PATH"
 else
 	tmp_dir_path="$(git rev-parse --show-toplevel 2>/dev/null)"
 
@@ -49,7 +31,6 @@ if [[ -d "$dir_path" ]]; then
 	if [[ -n "$cmd" ]]; then
 		if [[ "$cmd" == deploy* || "$cmd" == compile* ]]; then
 			cd ./portal-impl
-			# cmd="deploy-properties"
 		fi
 
 		ant $cmd

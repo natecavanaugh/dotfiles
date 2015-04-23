@@ -12,62 +12,6 @@ export UNAME=$(uname)
 
 export IS_CYGWIN=$IS_CYGWIN
 
-# Common paths
-
-export NC_DEV_PATH="$HOME/Dev"
-
-export NC_DEV_WORK_PATH="${NC_DEV_PATH}/Work"
-
-export NC_DATA_PATH="$HOME/Data"
-
-export NC_LIFERAY_PATH="$NC_DEV_PATH/Liferay"
-
-export NC_TRUNK_DEV_PATH="$NC_LIFERAY_PATH/Master"
-
-export NC_EE_PATH="$NC_LIFERAY_PATH/EE"
-
-export NC_TRUNK_PORTAL_PATH="${NC_TRUNK_DEV_PATH}/liferay-portal"
-
-export NC_TRUNK_61_PORTAL_PATH="${NC_TRUNK_DEV_PATH}/liferay-portal-6.1.x"
-
-export NC_TRUNK_PW_HTML_PATH="${NC_TRUNK_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_EE_PORTAL_PATH="${NC_EE_PATH}/liferay-portal-ee"
-
-export NC_EE60_PORTAL_PATH="${NC_EE_PATH}/6.0.x/liferay-portal-ee-6.0.x"
-
-export NC_EE61_PORTAL_PATH="${NC_EE_PATH}/6.1.x/liferay-portal-ee-6.1.x"
-
-export NC_EE_PW_HTML_PATH="${NC_EE_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_EE60_PW_HTML_PATH="${NC_EE60_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_EE61_PW_HTML_PATH="${NC_EE61_PORTAL_PATH}/portal-web/docroot/html"
-
-export NC_BRANCHES_PATH="${NC_DEV_PATH}/Liferay/Branches"
-
-export NC_ALLOY_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui"
-
-export NC_ALLOY_DEPRECATED_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-deprecated"
-
-export NC_ALLOY_1_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-1.0.x"
-
-export NC_ALLOY_15_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-1.5.x"
-
-export NC_ALLOY_2_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-2.0.x"
-
-export NC_ALLOY_2D_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-2.0.x-deprecated"
-
-export NC_ALLOY_EE1_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-ee-1.0.x"
-
-export NC_ALLOY_EE15_PATH="${NC_DEV_WORK_PATH}/Alloy/alloy-ui-ee-1.5.x"
-
-export NC_GIT_HOME="${NC_DEV_WORK_PATH}/git/natecavanaugh"
-
-export NC_BIN_PATH="${HOME}/.bin"
-
-export NC_NL=$'\n'
-
 export BASH_COMPLETION_PATH=`brew --prefix 2>/dev/null`/etc/bash_completion
 
 export MYSQL_PS1="(\u@\h) [\d]> "

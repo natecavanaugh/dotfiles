@@ -4827,7 +4827,30 @@ set thefullpath to POSIX path of finder_folder</string>
 							<key>Path</key>
 							<string></string>
 							<key>Text</key>
-							<string>on run	tell application "iTerm"		-- talk to the first terminal		tell the first terminal			tell the current session								-- write some text				-- set _session to current session of current terminal				-- tell _session				-- write text "pwd | pbcopy"				-- exec command "pwd | pbcopy"				set tty_name to do shell script "basename " &amp; (get tty)				-- set working_dir to do shell script "lsof -a -d cwd -F n -p $(ps -f | grep " &amp; tty_name &amp; " | head -n 1 | awk '{ print $2; }') | egrep -v 'p[0-9]+' | awk '{ sub(/^n/, ""); print; }'"				-- echo "test"								-- exec command "echo $PWD"				-- end tell							end tell		end tell	end tell		return tty_nameend run</string>
+							<string>on run
+	tell application "iTerm"
+		-- talk to the first terminal
+		tell the first terminal
+			tell the current session
+
+				-- write some text
+				-- set _session to current session of current terminal
+				-- tell _session
+				-- write text "pwd | pbcopy"
+				-- exec command "pwd | pbcopy"
+				set tty_name to do shell script "basename " &amp; (get tty)
+				-- set working_dir to do shell script "lsof -a -d cwd -F n -p $(ps -f | grep " &amp; tty_name &amp; " | head -n 1 | awk '{ print $2; }') | egrep -v 'p[0-9]+' | awk '{ sub(/^n/, ""); print; }'"
+				-- echo "test"
+
+				-- exec command "echo $PWD"
+				-- end tell
+
+			end tell
+		end tell
+	end tell
+
+	return tty_name
+end run</string>
 							<key>TimeOutAbortsMacro</key>
 							<true/>
 							<key>TrimResults</key>
@@ -4990,7 +5013,7 @@ echo $PWD
 							<key>Paste</key>
 							<false/>
 							<key>Text</key>
-							<string>cd $NC_TRUNK_PORTAL_PATH</string>
+							<string>cd $NC_MASTER_PORTAL_PATH</string>
 						</dict>
 						<dict>
 							<key>Action</key>
@@ -5328,7 +5351,30 @@ echo $PWD
 							<key>Path</key>
 							<string></string>
 							<key>Text</key>
-							<string>on run	tell application "iTerm"		-- talk to the first terminal		tell the first terminal			tell the current session								-- write some text				-- set _session to current session of current terminal				-- tell _session				-- write text "pwd | pbcopy"				-- exec command "pwd | pbcopy"				set tty_name to do shell script "basename " &amp; (get tty)				-- set working_dir to do shell script "lsof -a -d cwd -F n -p $(ps -f | grep " &amp; tty_name &amp; " | head -n 1 | awk '{ print $2; }') | egrep -v 'p[0-9]+' | awk '{ sub(/^n/, ""); print; }'"				-- echo "test"								-- exec command "echo $PWD"				-- end tell							end tell		end tell	end tell		return tty_nameend run</string>
+							<string>on run
+	tell application "iTerm"
+		-- talk to the first terminal
+		tell the first terminal
+			tell the current session
+
+				-- write some text
+				-- set _session to current session of current terminal
+				-- tell _session
+				-- write text "pwd | pbcopy"
+				-- exec command "pwd | pbcopy"
+				set tty_name to do shell script "basename " &amp; (get tty)
+				-- set working_dir to do shell script "lsof -a -d cwd -F n -p $(ps -f | grep " &amp; tty_name &amp; " | head -n 1 | awk '{ print $2; }') | egrep -v 'p[0-9]+' | awk '{ sub(/^n/, ""); print; }'"
+				-- echo "test"
+
+				-- exec command "echo $PWD"
+				-- end tell
+
+			end tell
+		end tell
+	end tell
+
+	return tty_name
+end run</string>
 							<key>TimeOutAbortsMacro</key>
 							<true/>
 							<key>TrimResults</key>
@@ -5459,7 +5505,7 @@ git dlt "$KMVAR_NC_GIT_REV" || echo "Current path is: $found_path, TTY: $TTY, PI
 							<key>MacroActionType</key>
 							<string>SetVariableToText</string>
 							<key>Text</key>
-							<string>cd $NC_TRUNK_PORTAL_PATH</string>
+							<string>cd $NC_MASTER_PORTAL_PATH</string>
 							<key>Variable</key>
 							<string>cd_portal</string>
 						</dict>

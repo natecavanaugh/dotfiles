@@ -39,8 +39,6 @@ function prompt () {
 		local small_pwd_length=10
 		local joiner="…"
 
-		NC_PROMPT_USER=""
-
 		git_dir=`git rev-parse --show-toplevel 2>/dev/null || echo $PWD`
 		git_dir=`echo $git_dir | rev | cut -d"/" -f1-2 | rev`
 		echo -ne "\033]0;$git_dir\007"
@@ -63,9 +61,8 @@ function prompt () {
 		STARTER="->"
 	fi
 
-	status_user="$NC_PROMPT_USER"
 	status_before="\n\`if [ \$? = 0 ]; then echo -e '${txtgrn}$SUCCESS${bldgrn}'; else echo -e '${txtred}$ERROR${bldred}'; fi\` \@$txtrst"
-	status_message="$status_before $txtcyn$status_user$bldgrn\${NC_PROMPT_PWD} $bldblu\$(__git_ps1 '[%s]')$txtrst\n"
+	status_message="$status_before $bldgrn\${NC_PROMPT_PWD} $bldblu\$(__git_ps1 '[%s]')$txtrst\n"
 	export PS1="$status_message $STARTER "
 }
 
