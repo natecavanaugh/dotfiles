@@ -8,7 +8,7 @@ pull_time=$5
 
 match_jira=
 
-size=$(git diff --word-diff -U0 --histogram --no-color $merge_base..$branch_name | grep -vE "^(diff|index|---|\+\+\+)" | sed -E 's/@@[^@]+@@.*//' | tr -d '\t' | tr -d ' ' | wc -c | tr -d ' ')
+size=$(git diff -w --word-diff -U0 --histogram --no-color $merge_base..$branch_name | grep -vE "^(diff|index|---|\+\+\+)" | sed -E 's/@@[^@]+@@.*//' | tr -d '\t' | tr -d ' ' | wc -c | tr -d ' ')
 
 jira_id=$(echo $branch_name | perl -ne '/([A-Z]{3,}-[0-9]+)$/ && print "$1"')
 
@@ -17,11 +17,11 @@ if [[ -z "$jira_id" ]]; then
 fi
 
 if [[ -n "$jira_id" ]]; then
-	echo "JIRA: http://issues.liferay.com/browse/$jira_id"
+	echo "$(color_text blue "JIRA:") http://issues.liferay.com/browse/$jira_id"
 fi
 
 if [[ -n "$pull_url" ]]; then
-	echo "Github: $pull_url"
+	echo "$(color_text yellow "Github:") $pull_url"
 fi
 
 bg='yellow'
@@ -37,6 +37,6 @@ fi
 pull_time=$(date -j -f '%Y-%m-%dT%H:%M:%SZ %z' "${pull_time} +0000" +"%b. %d, %y @ %I:%M %p")
 
 echo "Pull request size: $(color_text --bg $bg black " $size ") characters"
-echo "Committers: $committers"
-echo "Diff: $merge_base..$branch_name"
+echo "$(color_text cyan "Committers:") $committers"
+echo "$(color_text green "Diff:") $merge_base..$branch_name"
 echo "$(color_text --bg black white " $pull_time ")"
