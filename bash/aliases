@@ -386,9 +386,6 @@ alias nd='npm docs'
 
 # Misc
 
-# Github pull from user
-alias gp='github-pull'
-
 # Search history
 alias hs="history | grep --color=auto"
 
