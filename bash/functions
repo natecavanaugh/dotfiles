@@ -190,7 +190,7 @@ function dlc {
 	read -p "Are you sure you want to delete $PWD? [y/N]: " delete_dir
 	if [[ "$delete_dir" =~ [Yy] ]]; then
 		echo "Deleting $curr_dir"
-		rm -rf "$curr_dir" && cd ../
+		cd ../ && rm -rf "$curr_dir"
 	fi
 }
 
