@@ -463,6 +463,26 @@ function afs {
 	fi
 }
 
+# Navigate to the portal-impl (or the root of the project) directory and run ant format-source-current-branch
+
+function afs {
+	start_dir="$PWD"
+
+	{ pi || pr; } 1>/dev/null
+
+	local lastcmd="$?"
+
+	if [[ "$lastcmd" == 0 && -f "build.xml" ]]; then
+		grep -q 'format-source-current-branch' build*.xml && ant format-source-current-branch
+	else
+		echo "not there"
+	fi
+
+	if [[ "$PWD" != "$start_dir" ]]; then
+		cd "$start_dir";
+	fi
+}
+
 # Check any website to see if it is running on Liferay
 # as well as what version it is.
 # This assumes they haven't disabled the Liferay-Portal header
