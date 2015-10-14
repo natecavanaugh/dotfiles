@@ -248,7 +248,7 @@ function pfkj {
 # Simpler grep
 # @argument (optional) path
 function gr {
-	grep -R "$1" "${2:-.}" --exclude-dir="\.git" --color=auto
+	grep -Rn "$1" "${2:-.}" --exclude-dir="\.git" --color=auto
 	# echo $1 ${2:.}
 }
 
