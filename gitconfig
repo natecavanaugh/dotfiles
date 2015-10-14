@@ -184,7 +184,8 @@
 	sl = stash list
 	# List all entries in the stash with the --stat option
 	# (I really hate having to do it this way. Currently, passing the --stat option to stash list will give way too many files)
-	sls = "!f() { limit=\"$1\"; [[ -z \"$limit\" ]] && limit=$(git log --format=\"%gd\" -g refs/stash | wc -l) && let limit-=1; for (( c=0; c<=$limit; c++ )); do echo \"stash@{$c}\"; git stash show stash@{$c}; echo \"---\"; done }; f"
+	sls = "!f() { git stash list | while IFS=: read STASH ETC; do echo "$STASH: $ETC"; git dl ${STASH}^..${STASH}; echo "-----"; done }; f"
+	# sls = "!f() { limit=\"$1\"; [[ -z \"$limit\" ]] && limit=$(git log --format=\"%gd\" -g refs/stash | wc -l) && let limit-=1; for (( c=0; c<=$limit; c++ )); do echo \"stash@{$c}\"; git stash show stash@{$c}; echo \"---\"; done }; f"
 	# Show stash
 	sh = "!f() { local stash_rev=stash@{${1:-0}}; git stash show $stash_rev;  }; f"
 	# Show stash patch
