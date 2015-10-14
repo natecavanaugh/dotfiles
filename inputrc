@@ -1,4 +1,4 @@
-set show-all-if-ambiguous on
+set show-all-if-ambiguous off
 set history-size 0
 set completion-ignore-case on
 set visible-stats on
@@ -15,6 +15,6 @@ set show-all-if-unmodified on
 #"\e[A": history-search-backward
 #"\e[B": history-search-forward
 
-set menu-complete-display-prefix on
+#set menu-complete-display-prefix on
 
 "\C-x\C-r": re-read-init-file
