@@ -106,7 +106,7 @@
 	# Delete a local branch
 	db = branch -D
 	# Delete a remote branch
-	db-remote = !sh -c 'git push origin :$0'
+	db-remote = "!f() { git push origin :${1:-$(git brn)}; }; f"
 	# Delete both the local and remote branches
 	db-all = "!f() { git db $1; git db-remote $1; }; f"
 
