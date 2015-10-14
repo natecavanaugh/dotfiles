@@ -327,6 +327,82 @@ function pw () {
 	fi
 }
 
+# Navigate to the modules/frontend/ directory of any Liferay repo
+
+function __fw_get_path {
+	local top_level=$(git rev-parse --show-toplevel 2>/dev/null)
+	local fw_module="$top_level/modules/frontend"
+
+	echo "$fw_module"
+}
+
+function fw () {
+	local top_level=$(git rev-parse --show-toplevel 2>/dev/null)
+	local fw_module="$(__fw_get_path)/$1"
+
+	if [[ -n "$top_level" && -d "$fw_module" ]]; then
+		cd "$fw_module"
+	else
+		echo "Nowhere to go..."
+		return 1;
+	fi
+}
+
+function _complete_fw () {
+	local fw_module=$(__fw_get_path)
+	local curToken=${COMP_WORDS[COMP_CWORD]}
+
+	local initialToken="$curToken"
+
+	# echo ""
+	# echo "---------"
+	# echo "$curToken"
+	# echo "---------"
+	# echo ""
+
+	if [[ "$curToken" == */* ]]; then
+		fw_module="$fw_module/${curToken%/*}"
+		curToken="${curToken##*/}"
+	fi
+
+	# echo "$fw_module"
+	local found="$(cd $fw_module && (ls -1p | grep '/$' | tr -d /) | grep -i "$curToken")"
+
+
+
+	if [[ "$initialToken" == */* ]]; then
+		found="${initialToken%/*}/$found"
+	fi
+
+	# found=$(echo "$found" | tr $'\n' ' ')
+
+	# local IFS=$'\n'
+
+	COMPREPLY=("$found")
+	# COMPREPLY=($(compgen -o dirnames -- "$curToken"))
+	# COMPREPLY=( $( (ls -1p | grep '/$' | tr -d /) | grep "\<$cur.*" ) )
+}
+
+complete -o plusdirs -o nospace -o dirnames -F _complete_fw fw
+
+# Navigate to the modules/frontend/frontend-js-web directory of any Liferay repo
+
+function fwj () {
+	fw "frontend-js-web/src/META-INF/resources/"
+}
+
+# Navigate to the modules/frontend/frontend-js-web directory of any Liferay repo
+
+function fwc () {
+	fw "frontend-css-web/src/META-INF/resources/"
+}
+
+# Navigate to the modules/frontend/frontend-js-web directory of any Liferay repo
+
+function fwt () {
+	fw "frontend-theme/"
+}
+
 # Navigate to the portal-impl directory of any Liferay repo
 
 function pi () {
