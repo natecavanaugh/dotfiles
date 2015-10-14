@@ -316,7 +316,7 @@
 
 	# Find aliases
 	# Hat tip: http://brettterpstra.com/2014/08/04/shell-tricks-one-git-alias-to-rule-them-all/
-	finda = "!f() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
+	finda = "!f() { git config --get-regexp ^alias\\. | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; f"
 
 	[include]
 		path = .gitconfig_user
