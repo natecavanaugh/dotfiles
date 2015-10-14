@@ -33,6 +33,10 @@ if [[ -d "$dir_path" ]]; then
 			cd ./portal-impl
 		fi
 
+		if [[ -L "$dir_path/tools/sdk"  ]]; then
+			rm -rf "$dir_path/tools/sdk"
+		fi
+
 		ant $cmd
 		status=$?
 
