@@ -84,13 +84,15 @@ if [[ -z "$editor" ]]; then
 	exit 1
 fi
 
-if [[ ! -e "$editor" ]]; then
+if [[ ! -e "$editor" && ! $(command -v "${editor%% *}") ]]; then
 	echo "Please set user.editor to a valid application.";
 	echo "It is currently set to $editor";
 	exit 1;
 fi
 
-files=`git diff --pretty=format: --name-only --diff-filter=ACMRTUXB --relative $diff_opts $ref_spec`;
+files=`git diff --pretty=format: --numstat --no-renames --diff-filter=ACMRTUXB --relative $diff_opts $ref_spec`;
+
+binary_pattern=$(printf '%s\t-\t' -);
 
 useopen=`command -v open`;
 usecygwin=`command -v cygstart`;
@@ -131,7 +133,7 @@ if [[ $total_files -gt $MAX_FILES ]]; then
 	for i in $files; do
 		is_binary=0;
 
-		if [[ $OPEN_ALL == 0 && (-z "`file "$i"|grep text`") ]]; then
+		if [[ $OPEN_ALL == 0 && (-z "`file -be soft "$i"|grep text`") ]]; then
 			is_binary=1;
 		fi
 
@@ -161,7 +163,7 @@ if [[ -n $useopen ]]; then
 		open_message="Trying to open $i";
 
 		if [[ $OPEN_ALL == 0 ]]; then
-			if [[ -z "`file "$i"|grep text`" ]]; then
+			if [[ -z "`file -be soft "$i"|grep text`" ]]; then
 				is_binary=1;
 			fi
 

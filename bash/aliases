@@ -42,14 +42,14 @@ complete -o default -o nospace -F mygithelp gh
 
 # Personal
 
-LS_COMMAND="ls"
+export LS_COMMAND="ls"
 
 # if [[ $UNAME == "Darwin" && $(command -v lsc) ]]; then
 # 	LS_COMMAND="lsc"
 # fi
 
 alias ls='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p"'     #set the color settings on in the color ls program
-alias l='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p" -lgh'
+# alias l='$LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p" -lgh'
 
 # -- Paths
 
@@ -66,6 +66,3 @@ alias acd='ant clean deploy'
 
 # Search history
 alias hs="history | grep --color=auto"
-
-# Shortcut to SublimeText 2 cli
-alias so='~/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'

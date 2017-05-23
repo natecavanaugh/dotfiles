@@ -3,7 +3,7 @@
 function notify {
 	git ivy
 	echo $1
-	[[ `command -v terminal-notifier` ]] && terminal-notifier -message "$1"
+	[[ `command -v terminal-notifier` ]] && terminal-notifier -message "$1" || osascript -e "display notification \"$1\""
 }
 
 dir_path="${1:-.}"

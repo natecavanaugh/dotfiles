@@ -1,29 +1,36 @@
 # MySQL
-function mysqlexec {
+function mysqlexec () {
 	mysql -u root -p -e "$1";
 }
 
-function createdb {
+function createdb () {
 	mysqlexec "create database \`$1\` CHARACTER SET utf8;";
 }
 
-function dropdb {
+function dropdb () {
 	mysqlexec "drop database if exists \`$1\`;";
 }
 
-function cleardb {
+function cleardb () {
 	mysqlexec "drop database if exists \`$1\`; create database \`$1\`
 CHARACTER SET utf8;"
 }
 
 # Navigation
 
-function cdl {
+# ls -l unless we're piping out to another command
+function l {
+	[[ -t 1 ]] \
+		&& $LS_COMMAND --color=tty --time-style="+%m/%d/%Y %I:%M%p" -lgh $@ \
+		|| $LS_COMMAND -1 $@
+}
+
+function cdl () {
 	cd "$1";
 	ls -l
 }
 
-function upl {
+function upl () {
 	up "$@"
 	ls -l
 }
@@ -42,7 +49,7 @@ function upl {
 #   - Directory names with characters that need escaping when unquoted (such as spaces) are handled correctly.
 #   - For command completion, to specify names that need escaping when unquoted, specify them escaped rather than quoted;
 #     e.g., `up my \di<tab>' to match 'my dir' in the ancestral path.
-function up {
+function up () {
 
 	local dir='../'   # By default, go up 1 level.
 
@@ -68,8 +75,10 @@ function up {
 		fi
 	fi
 
+	# if we're not piping to another command
 	# Change to target directory; use of 'pushd' allows use of 'popd' to return to previous working directory.
-	pushd "$dir" 1>/dev/null
+	# Otherwise, if we are piping, then only print out the name of the file (allows for just being able to reference a parent dir easily)
+	[[ -t 1 ]] && pushd "$dir" 1>/dev/null || echo "$dir"
 }
 
 # Companion function to up(), used for command completion.
@@ -78,7 +87,7 @@ function up {
 # Note: The '-o filenames' option ensures that:
 #   (a) paths of directories returned via $COMPREPLY leave the cursor at the terminating "/" for potential further completion
 #   (b) paths with embeddes spaces and other characters requiring \-escaping are properly escaped.
-function _complete_up {
+function _complete_up () {
 
 	COMPREPLY=() # Initialize the array variable through which completions must be passed out.
 
@@ -135,7 +144,7 @@ function _complete_up {
 			fi
 		fi
 
-		COMPREPLY=($dir)
+		COMPREPLY=("$dir")
 	else # Token is a name -> look for a prefix match among all the ancestral path components; use the first match found (i.e., the next match up in the hierarchy).
 
 		# Determine if we should do case-insensitive matching or not, depending on whether cases-insensitive completion was turned on globally via ~/.inputrc or /etc/inputrc.
@@ -152,19 +161,30 @@ function _complete_up {
 		fi
 
 		local pathSoFar=''
-		local matchingPath=''
+		local matchingPath=()
 		# Note: By letting the loop iterate over ALL components starting at the root, we end up with the *last* match, i.e. the one *lowest* in the hierarchy (closed to the current working folder).
 		# !! We COULD try to return multiple matches, if applicable, but in practice we assume that there'll rarely be paths whose components have identical names or prefixes.
 		# !! Thus, should there be multiple matches, the user can reinvoke the same command to change to the next-higher match (though the command must be typed again), and so forth.
 		local parentPath=${PWD%/*}
 		local IFS='/' # This will break our parent path into components in the 'for' loop below.
 		local name
+		local ordered_token=$(sed -r 's#(.)#\1.*#g' <<< "$curToken")
+		local unordered_token=$(sed -r 's#(.)#(?=.*\1)#g' <<< "$curToken")
+		local combined_token=$(sed -r 's#(.)#(?:\1.*(?=.*\1))#g' <<< "$curToken")
+
+		# log "$combined_token"
+
 		for name in ${parentPath:1}; do
 			pathSoFar+=/$name
-			if [[ "$name" == *"$curToken"* ]]; then
-				matchingPath="$pathSoFar/"
+			if [[ "$name" == *"$curToken"* ]] || grep -iqP "$ordered_token|$unordered_token" <<< "$name"; then
+				# Appends to the array
+				matchingPath+=("$pathSoFar/")
+				# Prepends to the array
+				# matchingPath=("$pathSoFar/" "${matchingPath[@]}")
 			fi
 		done
+
+		# log "${matchingPath[@]}"
 
 		# Restore the state of 'nocasematch', if necessary.
 		(( caseInsensitive && nocasematchWasOff )) && shopt -u nocasematch >/dev/null
@@ -172,8 +192,7 @@ function _complete_up {
 		# If match was found, return its absolute path (ending in / to facilitate optional further completion).
 		# !! Note that the path will appear *unquoted* on the command line and must therefore be properly \-escaped (e.g., a ' '  as '\ ').
 		# !! Escaping is performed automatially by virtue of defining the compspec with '-o filenames' (passed to 'complete').
-		[[ -n "$matchingPath" ]] && COMPREPLY=("$matchingPath")
-
+		[[ -n "$matchingPath" ]] && COMPREPLY=("${matchingPath[@]}")
 	fi
 
 	return 0
@@ -184,10 +203,15 @@ complete -o plusdirs -o nospace -o filenames -F _complete_up up
 complete -o plusdirs -o nospace -o filenames -F _complete_up upl
 
 # Delete current directory
-function dlc {
+function dlc () {
 	curr_dir="$PWD"
 	# curr_dir="$(pwd -P)"
-	read -p "Are you sure you want to delete $PWD? [y/N]: " delete_dir
+	if [[ "$1" == "!" ]]; then
+		delete_dir="y"
+	else
+		read -p "Are you sure you want to delete $PWD? [y/N]: " delete_dir
+	fi
+
 	if [[ "$delete_dir" =~ [Yy] ]]; then
 		echo "Deleting $curr_dir"
 		cd ../ && rm -rf "$curr_dir"
@@ -199,32 +223,32 @@ function mcd () {
 	mkdir "$1" && cd "$1"
 }
 
-function le {
-	perl -p -e 's[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' "${1:-*}"
+function le () {
+	perl -p -e '$_ = "$. $_"; s[\r\n][WIN\n]; s[(?<!WIN)\n][UNIX\n]; s[\r][MAC\n];' "${1:-*}"
 }
 
-function showle {
+function showle () {
 	perl -p -e 's[\r\n][\\r\\n\n]; s[(?<!WIN)\n][\\n\n]; s[\r][\\r\n];' "${1:-*}"
 }
 
-function le2u {
+function le2u () {
 	perl -pi -e 's#\r\n#\n#' "${1:-*}"
 }
 
-function le2w {
+function le2w () {
 	perl -pi -e 's#\n#\r\n#' "${1:-*}"
 }
 
 # Process finder
 # @argument name of process
-function pf {
+function pf () {
 	args="ps ax | grep '$1'"
 	shift
 
 	while test $# -gt 0
 	do
-	    args="$args | grep '$1'"
-	    shift
+		args="$args | grep '$1'"
+		shift
 	done
 
 	args="$args | grep -v grep | awk '{ print \$1 }'"
@@ -235,33 +259,47 @@ function pf {
 
 # Process killer
 # @argument name of process
-function pfkill {
+function pfkill () {
 	pf "$@" | xargs kill -9
 	#ps -ef | grep PROCESS | grep -v grep | awk '{print $2}' | xargs kill -9
 }
 
 # Kill java :(
-function pfkj {
+function pfkj () {
 	pfkill "java"
 }
 
 # Simpler grep
 # @argument (optional) path
-function gr {
-	grep -Rn "$1" "${2:-.}" --exclude-dir="\.git" --color=auto
+function gr () {
+	if [[ -t 0 ]]; then
+		grep -Rn "$1" "${2:-.}" --exclude-dir="\.git" --color=auto
+	else
+		less <&0 2>/dev/null | grep "$1" "${@:2}"
+	fi
+
 	# echo $1 ${2:.}
 }
 
 # Set up simple server
 function server () {
-  open "http://localhost:${1}" && python -m SimpleHTTPServer $1;
+	local port="9000"
+
+	if [[ -n "$1" && "$1" != "-"* ]]; then
+		port="$1"
+		shift
+	fi
+
+	http-server -p $port --cors -o $@;
+	# open "http://localhost:${port}" && python -m SimpleHTTPServer $port 2>/dev/null;
 }
+
 # Functions
 
 # Find file by name
 # alias fn='find . -name '
 
-function fn {
+function fn () {
 	args=". -name '$1'"
 	shift
 
@@ -274,10 +312,25 @@ function fn {
 	eval find "$args"
 }
 
+function fnz () {
+	local args
+	nl=$'\n'
+	while test $# -gt 0
+	do
+		if [[ $1 == '--' ]]; then
+			echo "found it"
+		fi
+		args="$args arg:  $1 $nl"
+		shift
+	done
+
+	echo "$args"
+}
+
 # Resolves a symlink to determine where it points to
 # @argument path to symlink
 
-function resolve {
+function resolve () {
 	[ ! -h "$1" ] && echo "$1" || (local link="$(expr "$(command ls -ld -- "$1")" : '.*-> \(.*\)$')"; cd $(dirname $1); resolve "$link" | sed "s|^\([^/].*\)\$|$(dirname $1)/\1|");
 }
 
@@ -329,7 +382,7 @@ function pw () {
 
 # Navigate to the modules/frontend/ directory of any Liferay repo
 
-function __fw_get_path {
+function __fw_get_path () {
 	local top_level=$(git rev-parse --show-toplevel 2>/dev/null)
 	local fw_module="$top_level/modules/frontend"
 
@@ -378,7 +431,8 @@ function _complete_fw () {
 
 	# local IFS=$'\n'
 
-	COMPREPLY=("$found")
+	COMPREPLY=($found)
+	return 0
 	# COMPREPLY=($(compgen -o dirnames -- "$curToken"))
 	# COMPREPLY=( $( (ls -1p | grep '/$' | tr -d /) | grep "\<$cur.*" ) )
 }
@@ -417,8 +471,8 @@ function pi () {
 
 # Navigate to the portal-web directory and run ant build-themes
 
-function abt {
-	start_dir="$PWD"
+function abt () {
+	local start_dir="$PWD"
 
 	pw && ant build-themes
 
@@ -429,8 +483,8 @@ function abt {
 
 # Navigate to the portal-web directory and run ant build-alloy
 
-function aba {
-	start_dir="$PWD"
+function aba () {
+	local start_dir="$PWD"
 
 	pw;
 
@@ -445,8 +499,8 @@ function aba {
 
 # Navigate to the portal-impl (or the root of the project) directory and run ant format-source
 
-function afs {
-	start_dir="$PWD"
+function afs () {
+	local start_dir="$PWD"
 
 	{ pi || pr; } 1>/dev/null
 
@@ -465,8 +519,8 @@ function afs {
 
 # Navigate to the portal-impl (or the root of the project) directory and run ant format-source-current-branch
 
-function afs {
-	start_dir="$PWD"
+function afs () {
+	local start_dir="$PWD"
 
 	{ pi || pr; } 1>/dev/null
 
@@ -492,19 +546,25 @@ function lfrv () {
 	curl -ILs $1 | grep --color=auto "Liferay"
 }
 
-function finda {
-	alias | grep -i "$1" | sed -E "s/^alias ([^=]+)='(.*)'/\1 \2/" | awk -v nr=2 '{printf "\033[31m%_10s\033[1;37m", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf "%s%s", sep, $x; }; print "\033[0;39m"}';
+function finda () {
+	local terminal_open="%10s" terminal_close=""
+	if [[ -t 1 ]]; then
+		terminal_open="\033[31m${terminal_open}\033[1;37m"
+		terminal_close="\033[0;39m"
+	fi
+
+	alias | grep -i "$1" | sed -E "s/^alias ([^=]+)='(.*)'/\1 \2/" | awk -v nr=2 -v termo="$terminal_open" -v termc="$terminal_close" '{printf termo, $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf "%s%s", sep, $x; }; print termc}';
 }
 
-function right {
+function right () {
 	printf '%*s' $(tput cols) "$@"
 }
 
-function rule {
+function rule () {
 	printf -v _hr "%*s" $(tput cols) && echo ${_hr// /${1--}}
 }
 
-function rulem  {
+function rulem  () {
 	if [ $# -eq 0 ]; then
 		echo "Usage: rulem MESSAGE [RULE_CHARACTER]"
 		return 1
@@ -513,7 +573,158 @@ function rulem  {
 	printf -v _hr "%*s" $(tput cols) && echo -en ${_hr// /${2--}} && echo -e "\r\033[2C$1"
 }
 
-function details {
+NC_SUBLIME_BIN="${NC_SUBLIME_BIN}"
+
+if [[ -z "$NC_SUBLIME_BIN" ]]; then
+	NC_SUBLIME_BIN="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
+
+	for path in '' $HOME; do
+		if [[ -e "${path}$NC_SUBLIME_BIN" ]]; then
+			NC_SUBLIME_BIN="${path}$NC_SUBLIME_BIN"
+			break
+		fi
+	done
+fi
+
+function get_package_json {
+	local file="$1"
+
+	if [[ -f "$file" && "$file" != *"package.json" ]]; then
+		file=$(dirname "$file")
+	fi
+
+	if [[ -f "$file/package.json" ]]; then
+		echo "$file/package.json"
+	fi
+}
+
+function nmv {
+	local file="$(realpath $1)" version pkg
+
+
+
+	if [[ -f "$file" && "$file" != *"package.json" ]]; then
+		file=$(dirname "$file")
+	fi
+
+	# if [[ -d "$file" ]]; then
+	# 	if [[ -f "$file/package.json" ]]; then
+	# 		pkg="$file/package.json"
+	# 	fi
+	# else
+
+	# fi
+
+	if [[ -d "$file" && -f "$file/package.json" ]]; then
+		pkg="$file/package.json"
+	elif [[ ! -d "$file" ]]; then
+		# Could be a global node_module?
+		local file_path=$(command -v "$file")
+
+		if [[ -e "$file_path" ]]; then
+			if [[ -f "$file_path" ]]; then
+				file=$(dirname "$file_path")
+			fi
+
+			if [[ -f "$file/package.json" ]]; then
+				pkg="$file/package.json"
+			fi
+		fi
+	fi
+
+	if [[ -f "$pkg" ]]; then
+		version=$(node -e "var pkg = require('$pkg'); console.log(pkg.version);")
+	fi
+
+	echo "${version:-Couldn\'t determine the version of $file}"
+}
+
+# Shortcut to SublimeText cli
+function so () {
+	local -a args
+
+	# read args <&0
+	# args=$(cat)
+	# local OIFS="$IFS"
+	# local NL=$'\n'
+	# local IFS=
+
+	[[ -t 0 ]] && args+=("$@") || args+=($(less <&0 2>/dev/null))
+
+	"$NC_SUBLIME_BIN" "${args[@]}"
+
+	# IFS="$OIFS"
+
+	# echo "arr: ${#args[@]}: ${args[@]}"
+	# echo "str: ${#args}: ${args}"
+
+	# echo "${args[@]}" | wc -l
+
+
+	# if [[ -z "$args" ]]; then
+	# 	echo "\$args not set"
+	# else
+	# 	echo "\$args is set to $args"
+	# 	echo "-${args}- ${#args}"
+	# 	args=($args)
+	# 	echo "\$args[@] is set to ${args[@]}"
+	# 	echo "-${args[@]}- ${#args[@]}"
+	# 	echo -${args[@]}- ${#args[@]}
+	# fi
+	# [[ -t 0 ]] && args=("$@") || args=$(less <&0 2>/dev/null)
+
+	# "$NC_SUBLIME_BIN" "${args[@]}"
+	# echo "-"${args[@]}"-" ${#args[@]}
+
+	# local NONE='<NONE>'
+	# local args="$NONE"
+	# [[ -t 0 ]] && args=("$@") || stdin=($(less <&0 2>/dev/null))
+	# echo "functions:561, |args|: |${args[@]}|"
+	# echo "functions:562, |stdin|: |${stdin[@]}|"
+	# if [[ "$args" != "$NONE" ]]; then
+	# 	echo "functions:564, # args: ${#args[@]}"
+	# elif [[ "$stdin" != "$NONE" ]]; then
+	# 	echo "functions:567, # |stdin[@]|: |${stdin[@]}|, and |stdin|: |${stdin}|"
+	# 	echo "functions:568, # stdin: ${#stdin[@]}"
+	# 	echo "functions:569, # stdin: ${#stdin}"
+	# fi
+	# # Read from argument or stdin
+	# args="${1:-$(less <&0 2>/dev/null)}"
+	# ~/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl
+}
+
+function realpath {
+	perl -e "use Cwd qw(realpath);print realpath('$1');"
+}
+
+function details_realpath {
+	local file_path="$1" tmp_file_path
+
+	if [[ "$file_path" == *$'\n'* ]]; then
+		tmp_file_path=$(while read line; do echo $(realpath "$line"); done <<<"$file_path")
+	else
+		tmp_file_path=$(realpath "$file_path")
+	fi
+	# if [[ "$file_path" == *$'\n'* ]]; then
+	# 	tmp_file_path=$(while read line; do python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$line"; done <<<"$file_path")
+	# else
+	# 	tmp_file_path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$file_path")
+	# fi
+
+	# if command -v greadlink > /dev/null; then
+	# 	tmp_file_path=$(greadlink -f "$file_path")
+	# else
+		# tmp_file_path=$(readlink -f "$file_path" 2> /dev/null)
+
+		# if [[ -z "$tmp_file_path" ]]; then
+		# 	tmp_file_path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$file_path")
+		# fi
+	# fi
+
+	echo "${tmp_file_path:-$file_path}"
+}
+
+function details () {
 	local OPTIND=1 OPTARG OPTION
 
 	usage()
@@ -532,23 +743,25 @@ OPTIONS:
 EOF
 	}
 
-	RESOLVE=0
+	local RESOLVE=0
+
+	local -a ARGS;
 
 	while getopts ":hr" OPTION
 	do
-	     case $OPTION in
-	         h)
-	             usage
-	             return
-	             ;;
-	         r)
-	             RESOLVE=1
-	             ;;
-	         ?)
-	             usage
-	             return
-	             ;;
-	     esac
+		case $OPTION in
+			h)
+				usage
+				return
+				;;
+			r)
+				RESOLVE=1
+				;;
+			?)
+				usage
+				return
+				;;
+		esac
 	done
 	shift $(($OPTIND - 1))
 
@@ -562,6 +775,7 @@ EOF
 			if [[ $RESOLVE == 1 ]]; then
 				alias_cmd="$(sed -re "s/alias "$1"='(\S+).*'$/\1/" <<< "$ref")"
 				alias_cmd=$(echo "$alias_cmd" | sed 's/\$//')
+
 				if [[ "$alias_cmd" == "$1" ]]; then
 					alias_cmd=$(which "$alias_cmd")
 				fi
@@ -571,7 +785,37 @@ EOF
 				echo "$ref"
 			fi
 		elif [[ $cmd_type == "file" ]]; then
-			which "$1" 2> /dev/null
+			local file_path=$(which -a "$1" 2> /dev/null | sort | uniq)
+
+			if [[ $RESOLVE == 1 ]]; then
+				file_path=$(details_realpath "$file_path")
+				# local tmp_file_path
+
+				# if [[ "$file_path" == *$'\n'* ]]; then
+				# 	tmp_file_path=$(while read line; do realpath "$line"; done <<<"$file_path")
+				# else
+				# 	tmp_file_path=$(realpath "$file_path")
+				# fi
+				# # if [[ "$file_path" == *$'\n'* ]]; then
+				# # 	tmp_file_path=$(while read line; do python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$line"; done <<<"$file_path")
+				# # else
+				# # 	tmp_file_path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$file_path")
+				# # fi
+
+				# # if command -v greadlink > /dev/null; then
+				# # 	tmp_file_path=$(greadlink -f "$file_path")
+				# # else
+				# 	# tmp_file_path=$(readlink -f "$file_path" 2> /dev/null)
+
+				# 	# if [[ -z "$tmp_file_path" ]]; then
+				# 	# 	tmp_file_path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$file_path")
+				# 	# fi
+				# # fi
+
+				# file_path="${tmp_file_path:-$file_path}"
+			fi
+
+			echo "$file_path"
 		elif [[ $cmd_type == "function" ]]; then
 			declare -f "$1" 2> /dev/null
 			shopt -s extdebug
@@ -588,6 +832,11 @@ EOF
 		if [[ -e "$path" ]]; then
 			# echo "$path is a file"
 			# ls -ldGhg --time-style="+%m/%d/%Y %r" "$path"
+
+			if [[ $RESOLVE == 1 ]]; then
+				path=$(details_realpath "$path")
+			fi
+
 			ls -ldGhg --time-style="+%m/%d/%Y %I:%M%p" --color=always "$path" | cut -f1,4- -d' '
 		else
 			path="${path%/*}"
@@ -614,8 +863,39 @@ EOF
 	return 1
 }
 
-alias d='details'
+# alias d='details'
+function d {
+	details $@
+}
+export -f details
+export -f d
 
 # add autocompletion for details and it's alias
 complete -c -v -f details
 complete -c -v -f d
+
+# function foo {
+# 	local OPTIND=1 RESOLVE=0 i=0 x
+# 	for x in $@; do
+# 		if [[ $x == -* ]]; then
+# 			x="${x#-}"
+
+# 			case "$x" in
+# 				h)
+# 					echo "quitting early: $x"
+# 					return
+# 					;;
+# 				r)
+# 					RESOLVE=1
+# 					shift $(($OPTIND - 1))
+# 					;;
+# 				?)
+# 					echo "quitting early: $x"
+# 					return
+# 					;;
+# 			esac
+# 		fi
+# 		echo "--$x--";
+# 	done
+# 		echo "RESOLVE: --$RESOLVE--";
+# }

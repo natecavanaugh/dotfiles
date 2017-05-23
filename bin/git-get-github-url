@@ -11,34 +11,44 @@ OPTIONS:
 	-r	use the specified remote (default is origin)
 	-f	load the specified file
 	-p	Only print the url
+	-d	Debug by printing the important variable info (this is automatically shown if no url is found)
+	-q	Quiets all debugging and output messages. If the
 EOF
 }
 
 DEFAULT_REMOTE="origin"
 FILE=""
 PRINT=0
+DEBUG=0
+QUIET=0
 
-while getopts ":hr:pf:" OPTION
+while getopts ":hr:pdqf:" OPTION
 do
-	 case $OPTION in
-		 h)
+	case $OPTION in
+		h)
 			usage
 			exit 1
 			;;
-		 r)
+		r)
 			DEFAULT_REMOTE=$OPTARG
 			;;
-		 f)
+		f)
 			FILE="$OPTARG"
 			;;
-		 p)
+		p)
 			PRINT=1
 			;;
-		 ?)
+		d)
+			DEBUG=1
+			;;
+		q)
+			QUIET=1
+			;;
+		?)
 			usage
 			exit
 			;;
-	 esac
+	esac
 done
 shift $(($OPTIND - 1))
 
@@ -74,13 +84,40 @@ if [[ -n "$FILE" ]]; then
 	commit="$commit/${full_file_path:${#git_path}}"
 fi
 
-github_url=$(echo "$remotes" | perl -lne "s#^$DEFAULT_REMOTE.*\s.*(?:https://github\.com/|github\.com:|git://github\.com/)(.*)/(.*)(?:\.git).*\$#https://github.com/\$1/\$2/$mode/$commit# && print && exit")
-
-if [[ $PRINT == 1 ]]; then
-	echo $github_url
-else
-	open $github_url
+if [[ -n "$remotes" ]]; then
+	github_url=$(echo "$remotes" | perl -lne "/github\.com/ && s#^$DEFAULT_REMOTE\s+(.+@)*([\w\d\.]+):(.*?)((?:\.git)?\s+\(.*)#https://github.com/\$3/$mode/$commit# && print && exit")
 fi
+# github_url=$(echo "$remotes" | perl -lne "s#^$DEFAULT_REMOTE.*\s.*(?:https://github\.com/|github\.com:|git://github\.com/)(.*)/(.*)(?:\.git).*\$#https://github.com/\$1/\$2/$mode/$commit# && print && exit")
+
+ret_val=0
+
+if [[ -n "$github_url" ]]; then
+	if [[ $PRINT == 1 ]]; then
+		echo $github_url
+	else
+		echo "Opening $github_url"
+		open $github_url
+	fi
+else
+	test ! $QUIET -eq 1 && echo "Could not get the URL for this repo. Debug info below"
+	ret_val=1
+fi
+
+
+if [[ $QUIET != 1 && (-z "$github_url" || $DEBUG -eq 1) ]]; then
+	echo ""
+	echo "\$remotes:"
+	echo "$remotes"
+	echo ""
+	echo "\$DEFAULT_REMOTE: $DEFAULT_REMOTE"
+	echo "\$mode: $mode"
+	echo "\$commit: $commit"
+	[[ -z "$github_url" ]] && echo "\$github_url is empty"
+	# [[ $DEBUG -eq 1 ]] && echo "The debug flag (-d) was passed"
+fi
+
+exit $ret_val
+
 # echo $github_url
 
 # (matches[0], matches[1], mode, target, new_git_path, file_name, lines)

@@ -2,7 +2,7 @@
 
 export EDITOR="subl -w";
 
-export ANT_OPTS="-Xms512m -Xmx4096m -XX:MaxPermSize=512m"
+export ANT_OPTS="-Xms512m -Xmx4096m"
 
 export GREP_OPTIONS="--exclude=\*.svn\*"
 
@@ -24,7 +24,8 @@ export MYSQL_PS1="(\u@\h) [\d]> "
 
 export LESS="FRX"
 
-export HISTCONTROL=erasedups
+export HISTCONTROL=ignoreboth
+# export HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend
 
 export LS_COLORS='di=96:fi=0:ln=95:pi=5:so=5:bd=5:cd=5:or=31:mi=0:ex=31'
@@ -37,7 +38,7 @@ export GIT_PS1_SHOWUNTRACKEDFILES="true";
 # # Show upstream state
 export GIT_PS1_SHOWUPSTREAM="verbose"
 
-export PATH=/usr/local/bin:/usr/local/mysql/bin:$HOME/.bin:$PATH:/usr/local/share/npm/bin
+export PATH=/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin:$HOME/.bin:$PATH
 
 if [[ -d $HOME/bin_private ]]; then
 	export PATH=$HOME/bin_private:$PATH

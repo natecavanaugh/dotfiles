@@ -16,6 +16,8 @@ EOF
 CHECKOUT=0
 UPSTREAM="upstream"
 
+remotes=$(git remote);
+
 while getopts ":hcu:" OPTION
 do
 	 case $OPTION in
@@ -36,6 +38,21 @@ do
 	 esac
 done
 shift $(($OPTIND - 1))
+
+if ! grep -qE "\b$UPSTREAM\b" <<< "$remotes" && grep -qE "\borigin\b" <<< "$remotes"; then
+	brn=$(git symbolic-ref --short HEAD)
+
+	git pull --rebase origin "$brn"
+
+	origin=$(git remote -v | grep -E "^origin.*\(fetch\)$" | awk '{print $2}')
+
+	msg="There was no remote named \"${NC_UNDGRN}$UPSTREAM${NC_TXTRST}\" found. Just did a ${NC_BLDRED}pull --rebase${NC_TXTRST} on ${NC_TXTYLW}${NC_BAKBLK} $brn ${NC_TXTRST} from ${NC_TXTWHT}${NC_BAKBLK} origin ${NC_TXTRST} ${NC_BLDBLK}($origin)${NC_TXTRST}"
+
+	echo ""
+	printf -v _hr "%*s" $(tput cols) && echo -en ${_hr// /-} && echo -e "\r\033[2C $msg "
+
+	exit
+fi
 
 current_branch=$(git brn)
 update_branch=${1:-$current_branch}

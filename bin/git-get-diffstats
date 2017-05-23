@@ -18,32 +18,41 @@ EOF
 IGNORE_DELETES=0
 NAMES=0
 RELATIVE=0
+# PATH_PREFIX=''
 
-while getopts ":hrfm" OPTION
+if [[ "$NC_RENDER_ABSOLUTE_PATHS" == 1 ]]; then
+	PATH_PREFIX=''
+fi
+
+while getopts ":hrfmp:" OPTION
 do
-	 case $OPTION in
-		 h)
+	case $OPTION in
+		h)
 			usage
 			exit 1
 			;;
-		 f)
+		f)
 			NAMES=1
 			;;
-		 m)
+		p)
+			[[ "$OPTARG" != "--" ]] && PATH_PREFIX="${OPTARG}" || PATH_PREFIX=""
+			;;
+		m)
 			IGNORE_DELETES=1
 			;;
-		 r)
+		r)
 			RELATIVE=1
 			;;
-		 ?)
+		?)
 			usage
 			exit
 			;;
-	 esac
+	esac
 done
 shift $(($OPTIND - 1))
 
 ref_spec=$1
+
 
 if [[ $NAMES == 0 ]]; then
 	git diff --stat $ref_spec
@@ -54,15 +63,32 @@ else
 		diff_cmd="$diff_cmd | grep -vE '^D'"
 	fi
 
+	top_level=$(git rev-parse --show-toplevel)
 	diff_cmd="$diff_cmd | cut -f2-"
 
 	files=$(eval $diff_cmd)
 
 	if [[ $RELATIVE == 0 ]]; then
+		# was set, may or may not be empty
+		if [[ -n "${PATH_PREFIX+x}" ]]; then
+			# has a value
+			if [[ -n "$PATH_PREFIX" ]]; then
+				PATH_PREFIX=$({ cd "$PATH_PREFIX" && pwd; } 2>/dev/null)
+
+				# PATH_PREFIX="$top_level/$(cd $PATH_PREFIX)"
+			fi
+
+			if [[ -z "$PATH_PREFIX" ]]; then
+				PATH_PREFIX="$top_level"
+			fi
+
+			# echo "$top_level"
+
+			files=$(echo "$files" | sed -E "s#^#${PATH_PREFIX%/}/#")
+		fi
+
 		echo "$files"
 	else
-		top_level=$(git rev-parse --show-toplevel)
-
 		# for file in $files; do
 		# 	python -c "import os.path; print os.path.relpath('$top_level/$file', '$PWD')"
 		# done
