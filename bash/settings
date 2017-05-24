@@ -4,8 +4,6 @@ export EDITOR="subl -w";
 
 export ANT_OPTS="-Xms512m -Xmx4096m"
 
-export GREP_OPTIONS="--exclude=\*.svn\*"
-
 export UNAME=$(uname)
 
 [[ $UNAME == *CYGWIN* ]] && IS_CYGWIN=1
