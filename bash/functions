@@ -804,6 +804,8 @@ EOF
 
 	local NO_EXIST
 
+	local -a OUTPUT
+
 	NO_EXIST="$1 doesn't seem to exist"
 
 	if [[ $(command -v "$1") && ! -e "$1" ]]; then
@@ -823,9 +825,9 @@ EOF
 					alias_cmd=$(which "$alias_cmd")
 				fi
 				# echo "alias_cmd: $alias_cmd"
-				details -r "$alias_cmd"
+				OUTPUT+=("$(details -r "$alias_cmd")")
 			else
-				echo "$ref"
+				OUTPUT+=("$ref")
 			fi
 		elif [[ $cmd_type == "file" ]]; then
 			local file_path
@@ -860,16 +862,17 @@ EOF
 				# file_path="${tmp_file_path:-$file_path}"
 			fi
 
-			echo "$file_path"
+			OUTPUT+=("$file_path")
 		elif [[ $cmd_type == "function" ]]; then
-			declare -f "$1" 2> /dev/null
+			OUTPUT+=("$(declare -f "$1" 2> /dev/null)")
 			shopt -s extdebug
-			declare -F "$1"
+			OUTPUT+=("$(declare -F "$1")")
 			shopt -u extdebug
 		else
-			type -a "$1" 2> /dev/null
+			OUTPUT+=("$(type -a "$1" 2> /dev/null)")
 		fi
-	elif [[ "$1" == */* || -e "$1" ]]; then
+	fi
+	if [[ "$1" == */* || -e "$1" ]]; then
 		# local path=$(python -c "import os,sys; print os.path.realpath(sys.argv[1])" "$1")
 		local path
 
@@ -884,7 +887,7 @@ EOF
 				path=$(details_realpath "$path")
 			fi
 
-			ls -ldGhg --time-style="+%m/%d/%Y %I:%M%p" --color=always "$path" | cut -f1,4- -d' '
+			OUTPUT+=("$(ls -ldGhg --time-style="+%m/%d/%Y %I:%M%p" --color=always "$path" | cut -f1,4- -d' ')")
 		else
 			path="${path%/*}"
 
@@ -893,21 +896,34 @@ EOF
 			done
 
 			if [[ -e "$path" && -n "$path" ]]; then
-				echo "${NO_EXIST}. The nearest directory is $path"
+				OUTPUT=("${NO_EXIST}. The nearest directory is $path")
 			else
-				echo "$NO_EXIST"
+				OUTPUT=("$NO_EXIST")
 			fi
-		fi
-	else
-		# let's check if it's a variable
-		if [[ -n ${!1+x} ]]; then
-			echo "\$$1 is a variable set to: ${!1}"
-		else
-			echo "$NO_EXIST"
 		fi
 	fi
 
-	return 1
+	# let's check if it's a variable
+	if [[ "$1" != */*  && -n ${!1+x} ]]; then
+		OUTPUT+=("\$$1 is a variable set to: ${!1}")
+	fi
+
+	local retval
+
+	if [[ "${#OUTPUT[@]}" -gt 0 ]]; then
+		local IFS
+		IFS=''
+		# for x in ${OUTPUT[@]}; do echo "--$x--"; done;
+		# (IFS=$'\n'; echo "${OUTPUT[*]}" )
+		printf '%b\n' "${OUTPUT[@]}"
+
+		retval=0
+	else
+		echo "$NO_EXIST"
+		retval=1
+	fi
+
+	return $retval
 }
 
 # alias d='details'
