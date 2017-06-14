@@ -90,7 +90,7 @@ if [[ ! -e "$editor" && ! $(command -v "${editor%% *}") ]]; then
 	exit 1;
 fi
 
-files=`git diff --pretty=format: --numstat --no-renames --diff-filter=ACMRTUXB --relative $diff_opts $ref_spec`;
+files=`git diff --pretty=format: --numstat --no-renames --diff-filter=ACMRTUXB --relative $diff_opts $ref_spec | awk '{ print $3 }'`;
 
 binary_pattern=$(printf '%s\t-\t' -);
 
