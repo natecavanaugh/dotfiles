@@ -1,6 +1,11 @@
 #
 
-source ~/.bash/prompt
+if [[ -f "$HOME/.bash_prompt.$USER" ]]; then
+	source "$HOME/.bash_prompt.$USER"
+else
+	source ~/.bash/prompt
+fi
+
 source ~/.bash/settings
 source ~/.bash/aliases
 source ~/.bash/functions

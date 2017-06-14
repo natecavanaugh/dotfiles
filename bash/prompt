@@ -1,5 +1,8 @@
 # Customize prompt
 function prompt () {
+	local txtblk txtred txtgrn txtylw txtblu txtpur txtcyn txtwht bldblk bldred bldgrn bldylw bldblu bldpur bldcyn bldwht unkblk undred undgrn undylw undblu undpur undcyn undwht bakblk bakred badgrn bakylw bakblu bakpur bakcyn bakwht txtrst
+
+
 	txtblk='\e[0;30m' # Black - Regular
 	txtred='\e[0;31m' # Red
 	txtgrn='\e[0;32m' # Green
@@ -62,6 +65,7 @@ function prompt () {
 	fi
 
 	status_before="\n\`if [ \$? = 0 ]; then echo -e '${txtgrn}$SUCCESS${bldgrn}'; else echo -e '${txtred}$ERROR${bldred}'; fi\` \@$txtrst"
+
 	status_message="$status_before $bldgrn\${NC_PROMPT_PWD} $bldblu\$(__git_ps1 '[%s]')$txtrst\n"
 	export PS1="$status_message $STARTER "
 }
