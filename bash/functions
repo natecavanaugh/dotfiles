@@ -808,7 +808,7 @@ EOF
 
 	NO_EXIST="$1 doesn't seem to exist"
 
-	if [[ $(command -v "$1") && ! -e "$1" ]]; then
+	if [[ $(command -v "$1") && ( ! -e "$1" || $RESOLVE == 0 ) ]]; then
 		local cmd_type
 
 		cmd_type="$(type -t "$1")"
@@ -911,14 +911,27 @@ EOF
 	local retval
 
 	if [[ "${#OUTPUT[@]}" -gt 0 ]]; then
-		local IFS
+		local IFS STR
 		IFS=''
+
+		if [[ $BASH_SUBSHELL == 0 ]]; then
+			# STR='%s\n'
+			# printf '%s\n' "${OUTPUT[@]}" | perl -0777 -pe 's/\n\n/=/g'
+			printf '%s\n' "${OUTPUT[@]}" | perl -0777 -pe 's/\n{2,}/=/g'
+		else
+			printf '%s' "${OUTPUT[@]}"
+			# printf '%s' "${OUTPUT[@]}" | grep -c '$'
+		fi
+
 		# for x in ${OUTPUT[@]}; do echo "--$x--"; done;
 		# (IFS=$'\n'; echo "${OUTPUT[*]}" )
-		printf '%b\n' "${OUTPUT[@]}"
-
+		# printf "$STR" "${OUTPUT[@]}"
+		# printf "$STR" "${OUTPUT[@]}" | perl -0777 -pe 's/\n\n/=/g'
+		# [[ -t 1 ]] && echo "yes" || echo "no"
+		# echo "$BASH_SUBSHELL"
 		retval=0
-	else
+	elif [[ $BASH_SUBSHELL == 0 ]]; then
+		#statements
 		echo "$NO_EXIST"
 		retval=1
 	fi
